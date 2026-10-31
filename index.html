@@ -141,6 +141,18 @@ video { display: block; width: 100%; height: 100%; object-fit: contain; backgrou
   -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
 .fsbtn svg { width: 18px; height: 18px; }
 .fsbtn:focus-visible { outline: 3px solid var(--gold-hi); outline-offset: 3px; }
+/* thank-you screen after the answer is sent */
+.thanks { position: absolute; inset: 0; z-index: 7; display: flex; align-items: center; justify-content: center; text-align: center; cursor: pointer;
+  background: radial-gradient(ellipse at 50% 46%, rgba(3, 14, 14, .72), rgba(3, 14, 14, .46) 70%);
+  -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px);
+  opacity: 0; visibility: hidden; transition: opacity .6s ease, visibility .6s; }
+.thanks.on { opacity: 1; visibility: visible; }
+.thanks canvas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.thanks-in { position: relative; padding: 0 24px; transform: translateY(14px) scale(.96); transition: transform .9s cubic-bezier(.2,.8,.2,1) .15s; }
+.thanks.on .thanks-in { transform: none; }
+.thanks h2 { margin: 0 0 14px; font: italic 600 clamp(34px, min(11.5vw, 6.6svh), 58px)/1.1 Georgia, "Times New Roman", serif; color: var(--gold-hi); text-shadow: 0 2px 0 rgba(120, 80, 20, .55), 0 0 34px rgba(255, 210, 120, .45); }
+.thanks p { margin: 0; font: 500 clamp(16px, min(4.6vw, 2.8svh), 22px)/1.45 var(--body); color: var(--cream); letter-spacing: .02em; }
+.thanks small { position: absolute; left: 0; right: 0; bottom: calc(66px + env(safe-area-inset-bottom, 0px)); font: 500 12px/1 var(--body); color: var(--cream); opacity: .5; letter-spacing: .06em; }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
 @media (min-width: 700px) { video { border-radius: 14px; } }
 </style>
@@ -167,6 +179,11 @@ video { display: block; width: 100%; height: 100%; object-fit: contain; backgrou
       </div>
       <a class="go off" id="rSend" href="#" target="_blank" rel="noopener" aria-disabled="true">Отправить в WhatsApp</a>
       <p class="hint" id="rHint">Откроется WhatsApp с готовым сообщением, останется нажать «Отправить».</p>
+    </div>
+    <div class="thanks" id="thanks" role="status" aria-live="polite">
+      <canvas id="confetti" aria-hidden="true"></canvas>
+      <div class="thanks-in"><h2 id="thTitle"></h2><p id="thText"></p></div>
+      <small>Нажмите, чтобы закрыть</small>
     </div>
     <div class="corner" id="corner">
       <button class="chip round" id="again" type="button" aria-label="Смотреть ещё раз" title="Смотреть ещё раз">
@@ -227,8 +244,67 @@ video { display: block; width: 100%; height: 100%; object-fit: contain; backgrou
   nameI.addEventListener('input', refresh);
   sendA.addEventListener('click', function (e) {
     if (sendA.getAttribute('aria-disabled') === 'true') { e.preventDefault(); hint.textContent = nameI.value.trim() ? 'Выберите «Буду» или «Не смогу».' : 'Напишите, пожалуйста, ваше имя.'; return; }
-    setTimeout(function () { hint.textContent = 'Спасибо! Ждём вас.'; if (answer === 'no') hint.textContent = 'Спасибо, что сообщили!'; }, 500);
+    hint.textContent = answer === 'no' ? 'Спасибо, что сообщили!' : 'Спасибо! Ждём вас.';
+    thanksPending(answer);
   });
+
+  /* thank-you screen: shown when the guest comes back from WhatsApp (or after 1.8 s if the page never lost focus) */
+  var thanks = document.getElementById('thanks'), cv = document.getElementById('confetti'), pend = null, timer = 0, raf = 0;
+  var still = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function thanksPending(kind) {
+    pend = kind; clearTimeout(timer);
+    timer = setTimeout(function () { if (pend) showThanks(pend); }, 1800);
+  }
+  function showThanks(kind) {
+    pend = null; clearTimeout(timer);
+    sheet.hidden = true;
+    document.getElementById('thTitle').textContent = kind === 'yes' ? 'До скорых встреч!' : 'Спасибо за ответ!';
+    document.getElementById('thText').textContent = kind === 'yes' ? '28 ноября в 14:30' : 'Жаль, что не получится.\nБудем думать о вас';
+    document.getElementById('thText').style.whiteSpace = 'pre-line';
+    clearCv(); thanks.dataset.kind = kind; thanks.classList.add('on');
+    if (kind === 'yes' && !still) confetti();
+  }
+  function clearCv() { cancelAnimationFrame(raf); var c = cv.getContext('2d'); c.setTransform(1, 0, 0, 1, 0, 0); c.clearRect(0, 0, cv.width, cv.height); }
+  thanks.addEventListener('click', function () { thanks.classList.remove('on'); clearCv(); });
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) { if (pend) { clearTimeout(timer); } return; }
+    if (pend) setTimeout(function () { if (pend) showThanks(pend); }, 350);
+    else if (thanks.classList.contains('on') && !still && thanks.dataset.kind !== 'no') setTimeout(confetti, 350);
+  });
+  function confetti() {
+    cancelAnimationFrame(raf);
+    var dpr = Math.min(window.devicePixelRatio || 1, 2), w = cv.clientWidth, h = cv.clientHeight;
+    cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr);
+    var g = cv.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    var COL = ['#ffe29a', '#e6c27a', '#f4e8cc', '#ffffff', '#e0a852', '#9fd8cb'], P = [], R = Math.random;
+    function add(x, y, vx, vy, delay) {
+      P.push({ x: x, y: y, vx: vx, vy: vy, d: delay || 0, c: COL[(R() * COL.length) | 0], w: 6 + R() * 6, h: 9 + R() * 8, a: R() * 6.28, va: (R() - .5) * 9,
+        t: R() * 6.28, vt: 4 + R() * 6, round: R() < .22 });
+    }
+    var k = Math.min(w, 460) / 400;
+    for (var i = 0; i < 70; i++) { /* two bursts from the bottom corners */
+      var s = (620 + R() * 760) * k, a = -(Math.PI / 2) + (R() - .5) * 0.95;
+      add(-6, h * .86, Math.abs(Math.cos(a)) * s * .9 + 60, Math.sin(a) * s - 120, R() * .25);
+      add(w + 6, h * .86, -(Math.abs(Math.cos(a)) * s * .9 + 60), Math.sin(a) * s - 120, R() * .25);
+    }
+    for (var j = 0; j < 70; j++) add(R() * w, -20 - R() * h * .35, (R() - .5) * 90, 90 + R() * 150, .5 + R() * 1.6); /* gentle rain */
+    var t0 = performance.now(), last = t0;
+    (function step(now) {
+      var dt = Math.min((now - last) / 1000, .05), el = (now - t0) / 1000; last = now;
+      g.clearRect(0, 0, w, h); var live = 0;
+      for (var n2 = 0; n2 < P.length; n2++) {
+        var p = P[n2]; if (el < p.d) { live++; continue; }
+        p.vy += 760 * dt; var drag = Math.pow(.18, dt); p.vx *= drag; if (p.vy < 0) p.vy *= drag; else p.vy = Math.min(p.vy, 260 + p.w * 6);
+        p.x += (p.vx + Math.sin(p.t) * 28) * dt; p.y += p.vy * dt; p.a += p.va * dt; p.t += p.vt * dt;
+        if (p.y > h + 30) continue; live++;
+        var flip = Math.cos(p.t); g.save(); g.translate(p.x, p.y); g.rotate(p.a); g.scale(1, flip); g.fillStyle = p.c;
+        g.globalAlpha = Math.min(1, (h + 30 - p.y) / 120 + .3);
+        if (p.round) { g.beginPath(); g.arc(0, 0, p.w / 2.2, 0, 6.28); g.fill(); } else g.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+        g.restore();
+      }
+      if (live && el < 9) raf = requestAnimationFrame(step); else g.clearRect(0, 0, w, h);
+    })(t0);
+  }
   var REVEAL = 15.2; /* seconds: the address is on screen from here */
   function reveal() { corner.classList.add('show'); }
   /* full screen without the address bar (Android and desktop; iPhone Safari does not allow it for pages) */
