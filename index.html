@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Приглашаем</title>
+<meta name="description" content="Нажмите, чтобы открыть приглашение">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Приглашаем">
+<meta property="og:description" content="Нажмите, чтобы открыть приглашение">
+<meta property="og:url" content="https://superinteligencehub.github.io/veronika/">
+<meta property="og:image" content="https://superinteligencehub.github.io/veronika/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#0a2423">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<style>
+html { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+body { margin: 0; }
+[hidden] { display: none !important; }
+/* Layout: the invitation video fills the screen. A small glass pill in the
+   bottom-right corner of the video opens the Waze route once the address is on screen. */
+:root {
+  --ink: #050e0f;
+  --gold: #e6c27a;
+  --gold-hi: #ffe29a;
+  --cream: #f4e8cc;
+  --glass: rgba(5, 14, 15, .58);
+  --line: rgba(230, 194, 122, .55);
+  --body: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  background: radial-gradient(70% 50% at 50% 38%, #123a37 0%, #0a2423 45%, #050e0f 100%) fixed, var(--ink);
+  color: var(--cream);
+  font-family: var(--body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0;
+  overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+.app { height: 100%; display: flex; align-items: center; justify-content: center; }
+.stage { position: relative; height: 100%; width: min(100%, calc(100svh * 9 / 16)); min-height: 0; }
+video { display: block; width: 100%; height: 100%; object-fit: contain; background: transparent; cursor: pointer; }
+
+.play {
+  position: absolute; left: 50%; top: 71%; transform: translate(-50%, -50%);
+  width: 104px; height: 104px; border-radius: 50%; border: 0; cursor: pointer; padding: 0;
+  background: radial-gradient(circle at 50% 28%, #2c6a66 0%, #0f3735 62%, #0a2423 100%);
+  box-shadow: 0 0 0 3px var(--gold), 0 0 0 5px rgba(255,226,154,.25), 0 0 46px rgba(230,170,70,.5);
+  display: flex; align-items: center; justify-content: center;
+  animation: breathe 2.4s ease-in-out infinite;
+  transition: opacity .5s ease, visibility .5s;
+}
+.play i { width: 0; height: 0; margin-left: 8px; border-left: 30px solid #fcf4de; border-top: 19px solid transparent; border-bottom: 19px solid transparent; }
+.play.gone { opacity: 0; visibility: hidden; pointer-events: none; }
+@keyframes breathe { 0%, 100% { transform: translate(-50%, -50%) scale(1) } 50% { transform: translate(-50%, -50%) scale(1.06) } }
+
+.corner {
+  position: absolute; right: 10px; bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+  display: flex; align-items: center; gap: 8px;
+  opacity: 0; visibility: hidden; transform: translateY(6px);
+  transition: opacity 1s ease, transform 1s ease, visibility 1s;
+}
+.corner.show { opacity: 1; visibility: visible; transform: none; }
+.chip {
+  display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+  height: 40px; padding: 0 14px 0 12px; border-radius: 999px;
+  background: var(--glass); border: 1px solid var(--line);
+  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+  color: var(--cream); text-decoration: none; cursor: pointer;
+  font: 600 14px/1 var(--body); letter-spacing: .02em;
+  transition: background .2s ease, border-color .2s ease;
+}
+.chip:hover { background: rgba(20, 66, 62, .75); border-color: var(--gold); }
+.chip svg { width: 17px; height: 17px; flex: none; color: var(--gold); }
+/* RSVP: a soft golden glow and a slow light sweep, so the button gently draws the eye */
+#rsvpOpen { position: relative; overflow: hidden; isolation: isolate; border-color: rgba(232, 200, 130, .55); }
+#rsvpOpen::after {
+  content: ""; position: absolute; top: -20%; bottom: -20%; left: 0; width: 46%; z-index: -1; pointer-events: none;
+  background: linear-gradient(100deg, transparent 0%, rgba(255, 236, 190, .55) 50%, transparent 100%);
+  transform: translateX(-160%) skewX(-18deg); opacity: 0;
+}
+.corner.show #rsvpOpen { animation: rsvpGlow 3.2s ease-in-out 1.2s infinite; }
+.corner.show #rsvpOpen::after { animation: rsvpSheen 4.2s ease-in-out 1.6s infinite; }
+@keyframes rsvpGlow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(240, 205, 130, 0), 0 0 8px rgba(240, 205, 130, .18); }
+  50% { box-shadow: 0 0 0 3px rgba(240, 205, 130, .14), 0 0 18px rgba(240, 205, 130, .45); }
+}
+@keyframes rsvpSheen {
+  0% { transform: translateX(-160%) skewX(-18deg); opacity: 0; }
+  12% { opacity: 1; }
+  45% { transform: translateX(330%) skewX(-18deg); opacity: 1; }
+  55%, 100% { transform: translateX(330%) skewX(-18deg); opacity: 0; }
+}
+.chip.round { width: 40px; padding: 0; display: none; }
+.corner.ended .chip.round { display: inline-flex; }
+.chip:focus-visible, .play:focus-visible, video:focus-visible { outline: 3px solid var(--gold-hi); outline-offset: 3px; }
+.corner { flex-wrap: nowrap; justify-content: flex-end; max-width: calc(100% - 20px); gap: 6px; }
+.corner .chip { flex: none; white-space: nowrap; }
+@media (max-width: 420px) {
+  .chip { height: 38px; padding: 0 11px 0 10px; gap: 5px; font-size: 13px; }
+  .chip svg { width: 15px; height: 15px; }
+  .chip.round { width: 38px; padding: 0; }
+}
+@media (max-width: 330px) { .corner { flex-wrap: wrap; } }
+.sheet {
+  position: absolute; left: 10px; right: 10px; bottom: calc(10px + env(safe-area-inset-bottom, 0px)); z-index: 5;
+  padding: 18px 16px 16px; border-radius: 22px;
+  background: rgba(6, 22, 22, .94); border: 1px solid var(--line);
+  -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+  box-shadow: 0 -10px 50px rgba(0,0,0,.5);
+  transition: opacity .35s ease, transform .35s ease, visibility .35s;
+}
+.sheet[hidden] { display: block !important; opacity: 0; visibility: hidden; transform: translateY(16px); pointer-events: none; }
+.sheet h3 { margin: 0 0 14px; font: 600 22px/1.2 Georgia, "Times New Roman", serif; font-style: italic; color: var(--gold); text-align: center; }
+.sheet .x { position: absolute; top: 8px; right: 8px; width: 40px; height: 40px; border: 0; border-radius: 50%; background: none; color: var(--cream); cursor: pointer; font-size: 22px; line-height: 1; opacity: .8; }
+.field { display: block; width: 100%; height: 50px; padding: 0 16px; margin: 0 0 12px; border-radius: 14px; border: 1px solid var(--line); background: rgba(255,255,255,.06); color: var(--cream); font: 500 16px/1 var(--body); }
+.field::placeholder { color: rgba(244,232,204,.5); }
+.field:focus-visible { outline: 3px solid var(--gold-hi); outline-offset: 2px; }
+.choice { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 0 0 12px; }
+.opt { height: 50px; border-radius: 14px; border: 1px solid var(--line); background: rgba(255,255,255,.05); color: var(--cream); font: 700 16px/1 var(--body); cursor: pointer; transition: background .2s, color .2s, border-color .2s; }
+.opt[aria-pressed="true"] { background: linear-gradient(100deg, var(--gold-hi), #e0a852); color: #0c2c2a; border-color: transparent; }
+.opt:focus-visible, .step button:focus-visible, .go:focus-visible, .sheet .x:focus-visible { outline: 3px solid var(--gold-hi); outline-offset: 2px; }
+.step { display: flex; align-items: center; justify-content: space-between; margin: 0 0 14px; padding: 0 4px 0 16px; height: 50px; border-radius: 14px; border: 1px solid var(--line); background: rgba(255,255,255,.05); font: 600 16px/1 var(--body); }
+.step[hidden] { display: none !important; }
+.step div { display: flex; align-items: center; gap: 4px; }
+.step button { width: 42px; height: 42px; border: 0; border-radius: 50%; background: rgba(230,194,122,.16); color: var(--gold-hi); font: 700 22px/1 var(--body); cursor: pointer; }
+.step output { min-width: 30px; text-align: center; font-variant-numeric: tabular-nums; }
+.go { display: flex; align-items: center; justify-content: center; height: 54px; border-radius: 999px; text-decoration: none; font: 700 17px/1 var(--body); color: #0c2c2a; background: linear-gradient(100deg, var(--gold-hi), #e0a852); box-shadow: 0 8px 26px rgba(230,170,70,.3); transition: opacity .2s; }
+.go.off { opacity: .4; box-shadow: none; }
+.hint { margin: 10px 0 0; min-height: 1.2em; text-align: center; font-size: 13px; color: var(--cream); opacity: .85; }
+.fsbtn { position: absolute; top: 10px; right: 10px; z-index: 4; width: 40px; height: 40px; padding: 0; border-radius: 50%; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; color: var(--gold); background: var(--glass); border: 1px solid var(--line);
+  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
+.fsbtn svg { width: 18px; height: 18px; }
+.fsbtn:focus-visible { outline: 3px solid var(--gold-hi); outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+@media (min-width: 700px) { video { border-radius: 14px; } }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="stage">
+    <video id="v" src="invite.mp4" poster="poster.jpg" playsinline webkit-playsinline preload="auto" aria-label="Видео-приглашение на первый день рождения Вероники"></video>
+    <button class="play" id="play" type="button" aria-label="Открыть приглашение"><i></i></button>
+    <button class="fsbtn" id="fs" type="button" hidden aria-label="На весь экран" title="На весь экран">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path id="fsIcon" d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
+    </button>
+    <div class="sheet" id="sheet" role="dialog" aria-label="Подтверждение прихода" hidden>
+      <button class="x" id="rsvpClose" type="button" aria-label="Закрыть">×</button>
+      <h3>Вы придёте?</h3>
+      <input class="field" id="rName" type="text" autocomplete="name" placeholder="Ваше имя" maxlength="60">
+      <div class="choice">
+        <button class="opt" id="optYes" type="button" aria-pressed="false">Буду</button>
+        <button class="opt" id="optNo" type="button" aria-pressed="false">Не смогу</button>
+      </div>
+      <div class="step" id="rCount" hidden>
+        <span>Сколько человек</span>
+        <div><button id="minus" type="button" aria-label="Меньше">−</button><output id="num">1</output><button id="plus" type="button" aria-label="Больше">+</button></div>
+      </div>
+      <a class="go off" id="rSend" href="#" target="_blank" rel="noopener" aria-disabled="true">Отправить в WhatsApp</a>
+      <p class="hint" id="rHint">Откроется WhatsApp с готовым сообщением, останется нажать «Отправить».</p>
+    </div>
+    <div class="corner" id="corner">
+      <button class="chip round" id="again" type="button" aria-label="Смотреть ещё раз" title="Смотреть ещё раз">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
+      </button>
+      <button class="chip" id="rsvpOpen" type="button" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+        Подтвердить
+      </button>
+      <a class="chip" id="gmaps" href="#" target="_blank" rel="noopener" aria-label="Маршрут в Google Картах">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="10" r="2.6"/></svg>
+        Google Карты
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var v = document.getElementById('v'), play = document.getElementById('play'), corner = document.getElementById('corner');
+  /* Address as published on houseoflight.lv */
+  var Q = 'House of Light, Liepājas iela 56, Rīga';
+  /* Google Maps route: opens the Maps app on a phone, the website otherwise */
+  document.getElementById('gmaps').href = 'https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent(Q);
+  /* RSVP: answers go to the host's WhatsApp as a ready message (digits only, with country code) */
+  var PHONE = '37125999483';
+  var enc = encodeURIComponent;
+  var ro = document.getElementById('rsvpOpen'), sheet = document.getElementById('sheet'), sendA = document.getElementById('rSend');
+  var nameI = document.getElementById('rName'), cntRow = document.getElementById('rCount'), numO = document.getElementById('num'), hint = document.getElementById('rHint');
+  var yes = document.getElementById('optYes'), no = document.getElementById('optNo'), answer = null, n = 1;
+  if (PHONE) ro.hidden = false;
+  function msg() {
+    var nm = nameI.value.trim().replace(/[*_~`]/g, '');
+    /* emoji arrive as "?" in WhatsApp's prefilled text: only the star, the bullet and the line are used */
+    var line = '━━━━━━━━━━━━━━━';
+    var head = '★ *Вероника · 1 годик*\n' + line + '\n';
+    if (answer === 'yes') {
+      return head + '• *' + nm + '*\n• с радостью придём!\n• Гостей: *' + n + '*\n' + line
+        + '\n• 28 ноября 2026, 14:30\n• House of Light, Liepājas iela 56\n\n_Спасибо за приглашение!_';
+    }
+    return head + '• *' + nm + '*\n• к сожалению, не сможем прийти\n' + line
+      + '\n_Спасибо за приглашение, поздравляем Веронику!_';
+  }
+  function refresh() {
+    var ok = !!(nameI.value.trim() && answer);
+    sendA.classList.toggle('off', !ok); sendA.setAttribute('aria-disabled', ok ? 'false' : 'true');
+    sendA.href = ok ? 'https://wa.me/' + PHONE + '?text=' + enc(msg()) : '#';
+    cntRow.hidden = answer !== 'yes'; numO.textContent = n;
+    yes.setAttribute('aria-pressed', String(answer === 'yes')); no.setAttribute('aria-pressed', String(answer === 'no'));
+  }
+  function openSheet() { sheet.hidden = false; hint.textContent = 'Откроется WhatsApp с готовым сообщением, останется нажать «Отправить».'; }
+  ro.addEventListener('click', openSheet);
+  document.getElementById('rsvpClose').addEventListener('click', function () { sheet.hidden = true; });
+  yes.addEventListener('click', function () { answer = 'yes'; refresh(); });
+  no.addEventListener('click', function () { answer = 'no'; refresh(); });
+  document.getElementById('minus').addEventListener('click', function () { n = Math.max(1, n - 1); refresh(); });
+  document.getElementById('plus').addEventListener('click', function () { n = Math.min(10, n + 1); refresh(); });
+  nameI.addEventListener('input', refresh);
+  sendA.addEventListener('click', function (e) {
+    if (sendA.getAttribute('aria-disabled') === 'true') { e.preventDefault(); hint.textContent = nameI.value.trim() ? 'Выберите «Буду» или «Не смогу».' : 'Напишите, пожалуйста, ваше имя.'; return; }
+    setTimeout(function () { hint.textContent = 'Спасибо! Ждём вас.'; if (answer === 'no') hint.textContent = 'Спасибо, что сообщили!'; }, 500);
+  });
+  var REVEAL = 15.2; /* seconds: the address is on screen from here */
+  function reveal() { corner.classList.add('show'); }
+  /* full screen without the address bar (Android and desktop; iPhone Safari does not allow it for pages) */
+  var fsBtn = document.getElementById('fs'), started = false;
+  function canFull() { var el = document.documentElement; return !!(el.requestFullscreen || el.webkitRequestFullscreen); }
+  function isFull() { return !!(document.fullscreenElement || document.webkitFullscreenElement); }
+  function goFull() {
+    var el = document.documentElement, rq = el.requestFullscreen || el.webkitRequestFullscreen;
+    if (!rq || isFull()) return;
+    try { var r = rq.call(el, { navigationUI: 'hide' }); if (r && r.catch) r.catch(function () {}); } catch (e) {}
+  }
+  var ICON_IN = 'M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5', ICON_OUT = 'M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5';
+  function exitFull() {
+    try { var r = (document.exitFullscreen || document.webkitExitFullscreen).call(document); if (r && r.catch) r.catch(function () {}); } catch (e) {}
+  }
+  function syncFs() {
+    fsBtn.hidden = !(started && canFull());
+    var full = isFull();
+    document.getElementById('fsIcon').setAttribute('d', full ? ICON_OUT : ICON_IN);
+    var t = full ? 'Выйти из полного экрана' : 'На весь экран';
+    fsBtn.setAttribute('aria-label', t); fsBtn.title = t;
+  }
+  document.addEventListener('fullscreenchange', syncFs);
+  document.addEventListener('webkitfullscreenchange', syncFs);
+  fsBtn.addEventListener('click', function () { if (isFull()) exitFull(); else goFull(); setTimeout(syncFs, 400); });
+  function start() {
+    goFull(); started = true; setTimeout(syncFs, 700);
+    play.classList.add('gone');
+    var p = v.play(); if (p && p.catch) p.catch(function () { play.classList.remove('gone'); });
+  }
+  play.addEventListener('click', start);
+  v.addEventListener('click', function () {
+    if (v.ended) { restart(); return; }
+    if (v.paused) start(); else v.pause();
+  });
+  v.addEventListener('timeupdate', function () { if (v.currentTime >= REVEAL) reveal(); });
+  v.addEventListener('ended', function () { reveal(); corner.classList.add('ended'); });
+  v.addEventListener('error', function () { reveal(); });
+  function restart() { corner.classList.remove('ended'); v.currentTime = 0; start(); }
+  document.getElementById('again').addEventListener('click', restart);
+})();
+</script>
+</body>
+</html>
