@@ -80,15 +80,16 @@ video { display: block; width: 100%; height: 100%; object-fit: contain; backgrou
 }
 .chip:hover { background: rgba(20, 66, 62, .75); border-color: var(--gold); }
 .chip svg { width: 17px; height: 17px; flex: none; color: var(--gold); }
-/* RSVP: a soft golden glow and a slow light sweep, so the button gently draws the eye */
-#rsvpOpen { position: relative; overflow: hidden; isolation: isolate; border-color: rgba(232, 200, 130, .55); }
-#rsvpOpen::after {
+/* A soft golden glow and a slow light sweep draw the eye to one button: "Подтвердить" first, "Детали" once the guest has answered */
+#rsvpOpen, #infoOpen { position: relative; overflow: hidden; isolation: isolate; }
+.chip.glow { border-color: rgba(232, 200, 130, .55); }
+#rsvpOpen::after, #infoOpen::after {
   content: ""; position: absolute; top: -20%; bottom: -20%; left: 0; width: 46%; z-index: -1; pointer-events: none;
   background: linear-gradient(100deg, transparent 0%, rgba(255, 236, 190, .55) 50%, transparent 100%);
   transform: translateX(-160%) skewX(-18deg); opacity: 0;
 }
-.corner.show #rsvpOpen { animation: rsvpGlow 3.2s ease-in-out 1.2s infinite; }
-.corner.show #rsvpOpen::after { animation: rsvpSheen 4.2s ease-in-out 1.6s infinite; }
+.corner.show .chip.glow { animation: rsvpGlow 3.2s ease-in-out 1.2s infinite; }
+.corner.show .chip.glow::after { animation: rsvpSheen 4.2s ease-in-out 1.6s infinite; }
 @keyframes rsvpGlow {
   0%, 100% { box-shadow: 0 0 0 0 rgba(240, 205, 130, 0), 0 0 8px rgba(240, 205, 130, .18); }
   50% { box-shadow: 0 0 0 3px rgba(240, 205, 130, .14), 0 0 18px rgba(240, 205, 130, .45); }
@@ -226,7 +227,7 @@ video { display: block; width: 100%; height: 100%; object-fit: contain; backgrou
       <button class="chip round" id="again" type="button" aria-label="Смотреть ещё раз" title="Смотреть ещё раз">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
       </button>
-      <button class="chip" id="rsvpOpen" type="button" hidden>
+      <button class="chip glow" id="rsvpOpen" type="button" hidden>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
         Подтвердить
       </button>
@@ -252,6 +253,13 @@ video { display: block; width: 100%; height: 100%; object-fit: contain; backgrou
   var nameI = document.getElementById('rName'), cntRow = document.getElementById('rCount'), numO = document.getElementById('num'), hint = document.getElementById('rHint');
   var yes = document.getElementById('optYes'), no = document.getElementById('optNo'), answer = null, n = 1;
   if (PHONE) ro.hidden = false;
+  /* after the answer is sent, "Подтвердить" stops glowing and "Детали" starts (only when the guest is coming); remembered on this device */
+  var infoB = document.getElementById('infoOpen'), KEY = 'veronika-rsvp';
+  function applyAnswered(kind) { ro.classList.remove('glow'); if (kind === 'yes') infoB.classList.add('glow'); }
+  try {
+    if (/[?&]reset\b/.test(location.search)) localStorage.removeItem(KEY);
+    var prevAnswer = localStorage.getItem(KEY); if (prevAnswer) applyAnswered(prevAnswer);
+  } catch (e) {}
 
   /* details sheet */
   var info = document.getElementById('info'), amaps = document.getElementById('amaps'), gm = document.getElementById('gmaps');
@@ -305,6 +313,8 @@ video { display: block; width: 100%; height: 100%; object-fit: contain; backgrou
     if (sendA.getAttribute('aria-disabled') === 'true') { e.preventDefault(); hint.textContent = nameI.value.trim() ? 'Выберите «Буду» или «Не смогу».' : 'Напишите, пожалуйста, ваше имя.'; return; }
     hint.textContent = answer === 'no' ? 'Спасибо, что сообщили!' : 'Спасибо! Ждём вас.';
     thanksPending(answer);
+    applyAnswered(answer);
+    try { localStorage.setItem(KEY, answer); } catch (e) {}
   });
 
   /* thank-you screen: shown when the guest comes back from WhatsApp (or after 1.8 s if the page never lost focus) */
