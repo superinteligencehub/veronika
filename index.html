@@ -486,7 +486,78 @@ video { display: block; width: 100%; height: 100%; object-fit: contain; backgrou
       }
       g.globalCompositeOperation = 'source-over';
     }
-    function tick() { raf = 0; fit(); draw(v.currentTime); if (!v.paused && !v.ended) raf = requestAnimationFrame(tick); }
+
+    /* ---- sound: a soft chime when the star hits the lamp. Synthesised with WebAudio, nothing to download.
+       The soundtrack is in D, so the notes are D major pentatonic. 'bell' | 'whoosh' | 'off' ---- */
+    var SOUND = 'bell';
+    var ac = null, chain = null, prev = -1;
+    var N = { A6: 1760, B6: 1975.53, D6: 1174.66, D7: 2349.32, F7: 2959.96, A7: 3520 };
+    function makeChain(c) {   /* bus -> dry + a short, soft room -> gentle limiter -> out */
+      var bus = c.createGain(), dry = c.createGain(), wet = c.createGain(), conv = c.createConvolver(), lim = c.createDynamicsCompressor(), master = c.createGain();
+      var len = Math.round(c.sampleRate * 1.5), ir = c.createBuffer(2, len, c.sampleRate), ch, i, d;
+      for (ch = 0; ch < 2; ch++) { d = ir.getChannelData(ch); for (i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3.2); }
+      conv.buffer = ir; dry.gain.value = .85; wet.gain.value = .32; master.gain.value = .65;
+      lim.threshold.value = -10; lim.knee.value = 8; lim.ratio.value = 6; lim.attack.value = .003; lim.release.value = .2;
+      bus.connect(dry); bus.connect(conv); conv.connect(wet); dry.connect(lim); wet.connect(lim); lim.connect(master); master.connect(c.destination);
+      return { bus: bus };
+    }
+    function bell(c, out, f, at, vol, len) {   /* a struck bell: a few inharmonic partials, the higher ones die sooner */
+      [[1, 1, 1], [2.01, .32, .55], [3.0, .16, .38], [4.17, .07, .25]].forEach(function (p) {
+        if (f * p[0] > 9000) return;
+        var o = c.createOscillator(), a = c.createGain(), end = at + len * p[2];
+        o.type = 'sine'; o.frequency.value = f * p[0];
+        a.gain.setValueAtTime(.0001, at); a.gain.linearRampToValueAtTime(vol * p[1], at + .004); a.gain.exponentialRampToValueAtTime(.0001, end);
+        o.connect(a); a.connect(out); o.start(at); o.stop(end + .05);
+      });
+    }
+    function sweep(c, out, at, from, dur) {    /* a quiet rising whoosh of filtered noise */
+      var n = Math.round(c.sampleRate * (dur + .1)), b = c.createBuffer(1, n, c.sampleRate), d = b.getChannelData(0), i;
+      for (i = 0; i < n; i++) d[i] = Math.random() * 2 - 1;
+      var src = c.createBufferSource(), f = c.createBiquadFilter(), a = c.createGain();
+      src.buffer = b; f.type = 'bandpass'; f.Q.value = 1.1;
+      f.frequency.setValueAtTime(500 * Math.pow(12, from), at); f.frequency.exponentialRampToValueAtTime(6000, at + dur);
+      a.gain.setValueAtTime(.0001, at); a.gain.linearRampToValueAtTime(.05 + .09 * from, at + dur * .1);
+      a.gain.linearRampToValueAtTime(.17, at + dur * .85); a.gain.linearRampToValueAtTime(.0001, at + dur);
+      src.connect(f); f.connect(a); a.connect(out); src.start(at); src.stop(at + dur + .05);
+    }
+    var PLAN = {   /* [seconds after the moment, note, loudness, ring length] */
+      bell: {
+        fly: [[.12, 'A6', .05, 1.1], [.40, 'B6', .055, 1.1], [.66, 'D7', .06, 1.1], [.86, 'F7', .06, 1.0], [1.0, 'A7', .07, 1.0]],
+        hit: [[0, 'D6', .20, 2.6], [0, 'A6', .12, 2.2], [.01, 'D7', .09, 1.8], [.07, 'F7', .06, 1.2], [.15, 'A7', .05, 1.1], [.24, 'D7', .05, 1.2], [.34, 'F7', .035, 1.0], [.46, 'A6', .03, 1.2]]
+      },
+      whoosh: {
+        fly: [],
+        hit: [[0, 'D7', .15, 1.4], [0, 'A7', .08, 1.0], [.08, 'F7', .05, 1.1], [.18, 'A7', .045, 1.0], [.30, 'D7', .035, 1.1]]
+      }
+    };
+    function play(c, bus, kind, which, at, late) {   /* at = the moment the video reaches the cue; late = how far past it we already are */
+      var list = (PLAN[kind] || PLAN.bell)[which];
+      list.forEach(function (e) { if (e[0] < late - .05) return; bell(c, bus, N[e[1]], at + Math.max(0, e[0] - late), e[2], e[3]); });
+      if (kind === 'whoosh' && which === 'fly') sweep(c, bus, at, Math.min(1, late / (T1 - T0)), (T1 - T0) - late);
+    }
+    function ensureAudio() {
+      if (SOUND === 'off' || v.muted) return;
+      var AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
+      try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e) {}   /* iPhone: sound even with the silent switch on */
+      try { if (!ac) { ac = new AC(); chain = makeChain(ac); } if (ac.state === 'suspended') ac.resume(); } catch (e) { ac = null; }
+    }
+    function fire(which, late) {
+      if (!ac || ac.state !== 'running') return;
+      var t = ac.currentTime; chain.bus.gain.cancelScheduledValues(t); chain.bus.gain.setValueAtTime(1, t);
+      play(ac, chain.bus, SOUND, which, t + .01, late);
+    }
+    function hush() { if (!ac || !chain) return; var t = ac.currentTime; chain.bus.gain.cancelScheduledValues(t); chain.bus.gain.setTargetAtTime(0, t, .04); }
+    function sfx(cur) {   /* called every frame while the video plays: did the video just pass a cue? */
+      if (SOUND !== 'off' && !v.muted && !v.paused && prev >= 0 && cur > prev && cur - prev < .35) {
+        if (prev < T0 && cur >= T0) fire('fly', cur - T0);
+        if (prev < T1 && cur >= T1) fire('hit', cur - T1);
+      }
+      prev = cur;
+    }
+    ['click', 'touchend', 'keydown'].forEach(function (e) { document.addEventListener(e, ensureAudio, true); });
+    ['seeking', 'pause', 'ended'].forEach(function (e) { v.addEventListener(e, function () { hush(); if (e === 'seeking') prev = -1; }); });
+    /*__PREVIEW__*/
+    function tick() { raf = 0; fit(); var cur = v.currentTime; draw(cur); sfx(cur); if (!v.paused && !v.ended) raf = requestAnimationFrame(tick); }
     function kick() { if (!raf) raf = requestAnimationFrame(tick); }
     ['play', 'playing', 'seeked', 'pause', 'timeupdate'].forEach(function (e) { v.addEventListener(e, kick); });
     window.addEventListener('resize', kick);
