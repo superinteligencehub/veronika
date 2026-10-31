@@ -167,9 +167,6 @@ video { display: block; width: 100%; height: 100%; object-fit: contain; backgrou
 .act { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 50px; padding: 0 12px; border-radius: 14px; border: 1px solid var(--line); background: rgba(255,255,255,.05); color: var(--cream); text-decoration: none; text-align: center; cursor: pointer; font: 700 15px/1.15 var(--body); }
 .act svg { width: 18px; height: 18px; flex: none; color: var(--gold); }
 .act.wide { grid-column: 1 / -1; }
-.act.main { background: linear-gradient(100deg, var(--gold-hi), #e0a852); border-color: transparent; color: #0c2c2a; }
-.act.main svg { color: #0c2c2a; }
-.act small { display: block; margin-top: 3px; font: 500 12px/1.1 var(--body); opacity: .75; }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
 @media (min-width: 700px) { video { border-radius: 14px; } }
 </style>
@@ -214,10 +211,6 @@ video { display: block; width: 100%; height: 100%; object-fit: contain; backgrou
       <div class="acts">
         <a class="act" id="gmaps" href="#" target="_blank" rel="noopener">Google Карты</a>
         <a class="act" id="amaps" href="#" target="_blank" rel="noopener" hidden>Apple Карты</a>
-        <button class="act wide main" id="icsBtn" type="button">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M8 3v4M16 3v4M3.5 10h17M12 13v4.5M9.75 15.25h4.5"/></svg>
-          <span>Добавить в календарь<small>с напоминанием в 10:00 в день праздника</small></span>
-        </button>
         <a class="act wide" id="album" href="#" target="_blank" rel="noopener" hidden>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="3"/><circle cx="9" cy="10" r="1.6"/><path d="M4 17l5-4.5 4 3 3-2.5 4 3.5"/></svg>
           Фото с праздника
@@ -280,18 +273,6 @@ video { display: block; width: 100%; height: 100%; object-fit: contain; backgrou
       copyB.textContent = 'Выделено';
     }
     try { navigator.clipboard.writeText(text).then(done, pick); } catch (e) { pick(); }
-  });
-  /* calendar file: 28 Nov 2026, 14:30 Riga (UTC+2) = 12:30 UTC; alarm 270 min before = 10:00 local */
-  document.getElementById('icsBtn').addEventListener('click', function () {
-    var L = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Veronika//RU', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH', 'BEGIN:VEVENT',
-      'UID:veronika-1-2026@superinteligencehub.github.io', 'DTSTAMP:20261031T080000Z', 'DTSTART:20261128T123000Z', 'DTEND:20261128T143000Z',
-      'SUMMARY:Вероника · 1 годик', 'LOCATION:House of Light\\, Liepājas iela 56\\, Rīga',
-      'DESCRIPTION:Первый день рождения Вероники. Начало в 14:30.',
-      'BEGIN:VALARM', 'ACTION:DISPLAY', 'DESCRIPTION:Сегодня день рождения Вероники, начало в 14:30', 'TRIGGER:-PT270M', 'END:VALARM',
-      'END:VEVENT', 'END:VCALENDAR'];
-    var blob = new Blob([L.join('\r\n')], { type: 'text/calendar;charset=utf-8' });
-    var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'veronika-28-noyabrya.ics';
-    document.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(a.href); }, 4000);
   });
   function msg() {
     var nm = nameI.value.trim().replace(/[*_~`]/g, '');
