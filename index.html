@@ -153,6 +153,23 @@ video { display: block; width: 100%; height: 100%; object-fit: contain; backgrou
 .thanks h2 { margin: 0 0 14px; font: italic 600 clamp(34px, min(11.5vw, 6.6svh), 58px)/1.1 Georgia, "Times New Roman", serif; color: var(--gold-hi); text-shadow: 0 2px 0 rgba(120, 80, 20, .55), 0 0 34px rgba(255, 210, 120, .45); }
 .thanks p { margin: 0; font: 500 clamp(16px, min(4.6vw, 2.8svh), 22px)/1.45 var(--body); color: var(--cream); letter-spacing: .02em; }
 .thanks small { position: absolute; left: 0; right: 0; bottom: calc(66px + env(safe-area-inset-bottom, 0px)); font: 500 12px/1 var(--body); color: var(--cream); opacity: .5; letter-spacing: .06em; }
+/* details sheet: date, address, routes, calendar, album */
+#info { max-height: calc(100% - 20px); overflow-y: auto; }
+.facts { display: grid; gap: 10px; margin: 0 0 12px; }
+.fact { display: flex; align-items: flex-start; gap: 12px; padding: 12px 14px; border-radius: 14px; border: 1px solid var(--line); background: rgba(255,255,255,.05); }
+.fact > svg { width: 22px; height: 22px; flex: none; margin-top: 1px; color: var(--gold); }
+.fact div { flex: 1; min-width: 0; }
+.fact b { display: block; font: 700 16px/1.3 var(--body); color: var(--cream); }
+.fact span { display: block; margin-top: 3px; font: 500 14px/1.35 var(--body); color: var(--cream); opacity: .78; }
+.copy { flex: none; align-self: center; height: 34px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--line); background: rgba(230,194,122,.12); color: var(--gold-hi); font: 600 13px/1 var(--body); cursor: pointer; }
+.copy:focus-visible, .act:focus-visible { outline: 3px solid var(--gold-hi); outline-offset: 2px; }
+.acts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.act { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 50px; padding: 0 12px; border-radius: 14px; border: 1px solid var(--line); background: rgba(255,255,255,.05); color: var(--cream); text-decoration: none; text-align: center; cursor: pointer; font: 700 15px/1.15 var(--body); }
+.act svg { width: 18px; height: 18px; flex: none; color: var(--gold); }
+.act.wide { grid-column: 1 / -1; }
+.act.main { background: linear-gradient(100deg, var(--gold-hi), #e0a852); border-color: transparent; color: #0c2c2a; }
+.act.main svg { color: #0c2c2a; }
+.act small { display: block; margin-top: 3px; font: 500 12px/1.1 var(--body); opacity: .75; }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
 @media (min-width: 700px) { video { border-radius: 14px; } }
 </style>
@@ -180,6 +197,33 @@ video { display: block; width: 100%; height: 100%; object-fit: contain; backgrou
       <a class="go off" id="rSend" href="#" target="_blank" rel="noopener" aria-disabled="true">Отправить в WhatsApp</a>
       <p class="hint" id="rHint">Откроется WhatsApp с готовым сообщением, останется нажать «Отправить».</p>
     </div>
+    <div class="sheet" id="info" role="dialog" aria-label="Детали праздника" hidden>
+      <button class="x" id="infoClose" type="button" aria-label="Закрыть">×</button>
+      <h3>Как нас найти</h3>
+      <div class="facts">
+        <div class="fact">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M8 3v4M16 3v4M3.5 10h17"/></svg>
+          <div><b>28 ноября 2026, суббота</b><span>Начало в 14:30</span></div>
+        </div>
+        <div class="fact">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="10" r="2.6"/></svg>
+          <div><b>House of Light</b><span id="addr">Liepājas iela 56, Rīga</span></div>
+          <button class="copy" id="copyAddr" type="button">Копировать</button>
+        </div>
+      </div>
+      <div class="acts">
+        <a class="act" id="gmaps" href="#" target="_blank" rel="noopener">Google Карты</a>
+        <a class="act" id="amaps" href="#" target="_blank" rel="noopener" hidden>Apple Карты</a>
+        <button class="act wide main" id="icsBtn" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M8 3v4M16 3v4M3.5 10h17M12 13v4.5M9.75 15.25h4.5"/></svg>
+          <span>Добавить в календарь<small>с напоминанием в 10:00 в день праздника</small></span>
+        </button>
+        <a class="act wide" id="album" href="#" target="_blank" rel="noopener" hidden>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="3"/><circle cx="9" cy="10" r="1.6"/><path d="M4 17l5-4.5 4 3 3-2.5 4 3.5"/></svg>
+          Фото с праздника
+        </a>
+      </div>
+    </div>
     <div class="thanks" id="thanks" role="status" aria-live="polite">
       <canvas id="confetti" aria-hidden="true"></canvas>
       <div class="thanks-in"><h2 id="thTitle"></h2><p id="thText"></p></div>
@@ -193,10 +237,10 @@ video { display: block; width: 100%; height: 100%; object-fit: contain; backgrou
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
         Подтвердить
       </button>
-      <a class="chip" id="gmaps" href="#" target="_blank" rel="noopener" aria-label="Маршрут в Google Картах">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="10" r="2.6"/></svg>
-        Google Карты
-      </a>
+      <button class="chip" id="infoOpen" type="button" aria-label="Детали: дата, адрес, маршрут">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.8v.2"/></svg>
+        Детали
+      </button>
     </div>
   </div>
 </div>
@@ -215,6 +259,40 @@ video { display: block; width: 100%; height: 100%; object-fit: contain; backgrou
   var nameI = document.getElementById('rName'), cntRow = document.getElementById('rCount'), numO = document.getElementById('num'), hint = document.getElementById('rHint');
   var yes = document.getElementById('optYes'), no = document.getElementById('optNo'), answer = null, n = 1;
   if (PHONE) ro.hidden = false;
+
+  /* details sheet */
+  var info = document.getElementById('info'), amaps = document.getElementById('amaps'), gm = document.getElementById('gmaps');
+  var ALBUM = ''; /* link to the shared photo album: paste it here and the button appears after the party */
+  var ALBUM_FROM = new Date('2026-11-28T18:00:00+02:00');
+  if (/iPhone|iPad|iPod|Macintosh/.test(navigator.userAgent)) {
+    amaps.hidden = false; amaps.href = 'https://maps.apple.com/?daddr=' + enc(Q);
+  } else { gm.classList.add('wide'); }
+  if (ALBUM && new Date() >= ALBUM_FROM) { var al = document.getElementById('album'); al.href = ALBUM; al.hidden = false; }
+  document.getElementById('infoOpen').addEventListener('click', function () { sheet.hidden = true; info.hidden = false; });
+  document.getElementById('infoClose').addEventListener('click', function () { info.hidden = true; });
+  var copyB = document.getElementById('copyAddr');
+  copyB.addEventListener('click', function () {
+    var text = 'House of Light, Liepājas iela 56, Rīga';
+    function done() { copyB.textContent = 'Скопировано'; setTimeout(function () { copyB.textContent = 'Копировать'; }, 1800); }
+    function pick() {
+      var r = document.createRange(); r.selectNodeContents(document.getElementById('addr'));
+      var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+      copyB.textContent = 'Выделено';
+    }
+    try { navigator.clipboard.writeText(text).then(done, pick); } catch (e) { pick(); }
+  });
+  /* calendar file: 28 Nov 2026, 14:30 Riga (UTC+2) = 12:30 UTC; alarm 270 min before = 10:00 local */
+  document.getElementById('icsBtn').addEventListener('click', function () {
+    var L = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Veronika//RU', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH', 'BEGIN:VEVENT',
+      'UID:veronika-1-2026@superinteligencehub.github.io', 'DTSTAMP:20261031T080000Z', 'DTSTART:20261128T123000Z', 'DTEND:20261128T143000Z',
+      'SUMMARY:Вероника · 1 годик', 'LOCATION:House of Light\\, Liepājas iela 56\\, Rīga',
+      'DESCRIPTION:Первый день рождения Вероники. Начало в 14:30.',
+      'BEGIN:VALARM', 'ACTION:DISPLAY', 'DESCRIPTION:Сегодня день рождения Вероники, начало в 14:30', 'TRIGGER:-PT270M', 'END:VALARM',
+      'END:VEVENT', 'END:VCALENDAR'];
+    var blob = new Blob([L.join('\r\n')], { type: 'text/calendar;charset=utf-8' });
+    var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'veronika-28-noyabrya.ics';
+    document.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(a.href); }, 4000);
+  });
   function msg() {
     var nm = nameI.value.trim().replace(/[*_~`]/g, '');
     /* emoji arrive as "?" in WhatsApp's prefilled text: only the star, the bullet and the line are used */
@@ -234,7 +312,7 @@ video { display: block; width: 100%; height: 100%; object-fit: contain; backgrou
     cntRow.hidden = answer !== 'yes'; numO.textContent = n;
     yes.setAttribute('aria-pressed', String(answer === 'yes')); no.setAttribute('aria-pressed', String(answer === 'no'));
   }
-  function openSheet() { sheet.hidden = false; hint.textContent = 'Откроется WhatsApp с готовым сообщением, останется нажать «Отправить».'; }
+  function openSheet() { info.hidden = true; sheet.hidden = false; hint.textContent = 'Откроется WhatsApp с готовым сообщением, останется нажать «Отправить».'; }
   ro.addEventListener('click', openSheet);
   document.getElementById('rsvpClose').addEventListener('click', function () { sheet.hidden = true; });
   yes.addEventListener('click', function () { answer = 'yes'; refresh(); });
@@ -257,7 +335,7 @@ video { display: block; width: 100%; height: 100%; object-fit: contain; backgrou
   }
   function showThanks(kind) {
     pend = null; clearTimeout(timer);
-    sheet.hidden = true;
+    sheet.hidden = true; info.hidden = true;
     document.getElementById('thTitle').textContent = kind === 'yes' ? 'До скорых встреч!' : 'Спасибо за ответ!';
     document.getElementById('thText').textContent = kind === 'yes' ? '28 ноября в 14:30' : 'Жаль, что не получится.\nБудем думать о вас';
     document.getElementById('thText').style.whiteSpace = 'pre-line';
