@@ -487,11 +487,11 @@ video { display: block; width: 100%; height: 100%; object-fit: contain; backgrou
       g.globalCompositeOperation = 'source-over';
     }
 
-    /* ---- sound: a soft chime when the star hits the lamp. Synthesised with WebAudio, nothing to download.
-       The soundtrack is in D, so the notes are D major pentatonic. 'bell' | 'whoosh' | 'off' ---- */
+    /* ---- sound for the star, synthesised with WebAudio (nothing to download). The soundtrack is in D, so the notes
+       are D major. SOUND is one of: bell, whoosh, harp, box, glow, cine, off ---- */
     var SOUND = 'bell';
     var ac = null, chain = null, prev = -1;
-    var N = { A6: 1760, B6: 1975.53, D6: 1174.66, D7: 2349.32, F7: 2959.96, A7: 3520 };
+    var N = { D3: 146.83, A3: 220, D4: 293.66, F4: 369.99, A4: 440, D5: 587.33, F5: 739.99, A5: 880, B5: 987.77, D6: 1174.66, F6: 1479.98, A6: 1760, B6: 1975.53, D7: 2349.32, F7: 2959.96, A7: 3520 };
     function makeChain(c) {   /* bus -> dry + a short, soft room -> gentle limiter -> out */
       var bus = c.createGain(), dry = c.createGain(), wet = c.createGain(), conv = c.createConvolver(), lim = c.createDynamicsCompressor(), master = c.createGain();
       var len = Math.round(c.sampleRate * 1.5), ir = c.createBuffer(2, len, c.sampleRate), ch, i, d;
@@ -501,39 +501,86 @@ video { display: block; width: 100%; height: 100%; object-fit: contain; backgrou
       bus.connect(dry); bus.connect(conv); conv.connect(wet); dry.connect(lim); wet.connect(lim); lim.connect(master); master.connect(c.destination);
       return { bus: bus };
     }
-    function bell(c, out, f, at, vol, len) {   /* a struck bell: a few inharmonic partials, the higher ones die sooner */
-      [[1, 1, 1], [2.01, .32, .55], [3.0, .16, .38], [4.17, .07, .25]].forEach(function (p) {
-        if (f * p[0] > 9000) return;
-        var o = c.createOscillator(), a = c.createGain(), end = at + len * p[2];
-        o.type = 'sine'; o.frequency.value = f * p[0];
-        a.gain.setValueAtTime(.0001, at); a.gain.linearRampToValueAtTime(vol * p[1], at + .004); a.gain.exponentialRampToValueAtTime(.0001, end);
-        o.connect(a); a.connect(out); o.start(at); o.stop(end + .05);
-      });
+    function env(c, out, at, vol, att, len) {   /* silence -> vol over att seconds -> dies away by len */
+      var a = c.createGain(); a.gain.setValueAtTime(.0001, at); a.gain.linearRampToValueAtTime(vol, at + att); a.gain.exponentialRampToValueAtTime(.0001, at + len); a.connect(out); return a;
     }
-    function sweep(c, out, at, from, dur) {    /* a quiet rising whoosh of filtered noise */
-      var n = Math.round(c.sampleRate * (dur + .1)), b = c.createBuffer(1, n, c.sampleRate), d = b.getChannelData(0), i;
-      for (i = 0; i < n; i++) d[i] = Math.random() * 2 - 1;
-      var src = c.createBufferSource(), f = c.createBiquadFilter(), a = c.createGain();
-      src.buffer = b; f.type = 'bandpass'; f.Q.value = 1.1;
-      f.frequency.setValueAtTime(500 * Math.pow(12, from), at); f.frequency.exponentialRampToValueAtTime(6000, at + dur);
-      a.gain.setValueAtTime(.0001, at); a.gain.linearRampToValueAtTime(.05 + .09 * from, at + dur * .1);
-      a.gain.linearRampToValueAtTime(.17, at + dur * .85); a.gain.linearRampToValueAtTime(.0001, at + dur);
-      src.connect(f); f.connect(a); a.connect(out); src.start(at); src.stop(at + dur + .05);
+    function tone(c, out, type, f, at, vol, att, len) {
+      if (f > 9000) return; var o = c.createOscillator(); o.type = type; o.frequency.value = f; o.connect(env(c, out, at, vol, att, len)); o.start(at); o.stop(at + len + .05);
     }
-    var PLAN = {   /* [seconds after the moment, note, loudness, ring length] */
+    function noise(c, secs) { var n = Math.round(c.sampleRate * secs), b = c.createBuffer(1, n, c.sampleRate), d = b.getChannelData(0), i; for (i = 0; i < n; i++) d[i] = Math.random() * 2 - 1; var s = c.createBufferSource(); s.buffer = b; return s; }
+    /* the voices; each takes (context, output, frequency, start, loudness, length, attack) */
+    var VOICE = {
+      bell: function (c, out, f, at, vol, len) {   /* a struck bell: a few inharmonic partials, the higher ones die sooner */
+        [[1, 1, 1], [2.01, .32, .55], [3.0, .16, .38], [4.17, .07, .25]].forEach(function (p) { tone(c, out, 'sine', f * p[0], at, vol * p[1], .004, len * p[2]); });
+      },
+      box: function (c, out, f, at, vol, len) {    /* a music box: a clean tone with a short metallic click on top */
+        tone(c, out, 'sine', f, at, vol, .002, len); tone(c, out, 'sine', f * 3, at, vol * .25, .002, len * .25); tone(c, out, 'sine', f * 5.4, at, vol * .1, .002, len * .12);
+      },
+      pluck: function (c, out, f, at, vol, len) {  /* a harp string: bright at first, then mellow */
+        var lp = c.createBiquadFilter(), a = env(c, out, at, vol, .003, len), g2 = c.createGain(), o = c.createOscillator(), o2 = c.createOscillator();
+        lp.type = 'lowpass'; lp.frequency.setValueAtTime(Math.min(f * 6, 9000), at); lp.frequency.exponentialRampToValueAtTime(f * 1.5, at + len * .6);
+        o.type = 'triangle'; o.frequency.value = f; o2.type = 'sine'; o2.frequency.value = f * 2; g2.gain.value = .35;
+        o.connect(lp); o2.connect(g2); g2.connect(lp); lp.connect(a); o.start(at); o2.start(at); o.stop(at + len + .05); o2.stop(at + len + .05);
+      },
+      pad: function (c, out, f, at, vol, len, att) {   /* a warm held note: two slightly detuned voices through a soft filter */
+        var lp = c.createBiquadFilter(), a = env(c, out, at, vol, att || .3, len);
+        lp.type = 'lowpass'; lp.frequency.value = 1700; lp.connect(a);
+        [[f, 'sine'], [f * 1.004, 'sine'], [f * .5, 'triangle']].forEach(function (p, i) {
+          var o = c.createOscillator(), g = c.createGain(); o.type = p[1]; o.frequency.value = p[0]; g.gain.value = i === 2 ? .35 : 1; o.connect(g); g.connect(lp); o.start(at); o.stop(at + len + .05);
+        });
+      },
+      boom: function (c, out, f, at, vol, len) {   /* a soft low thump; a second tone higher up so phone speakers still carry it */
+        [[120, 42, 1], [240, 90, .45]].forEach(function (p) {
+          var o = c.createOscillator(); o.type = 'sine'; o.frequency.setValueAtTime(p[0], at); o.frequency.exponentialRampToValueAtTime(p[1], at + .4);
+          o.connect(env(c, out, at, vol * p[2], .006, len)); o.start(at); o.stop(at + len + .05);
+        });
+      },
+      sweep: function (c, out, f, at, vol, len) {  /* a quiet rising whoosh of filtered noise */
+        var src = noise(c, len + .1), fl = c.createBiquadFilter(), a = c.createGain();
+        fl.type = 'bandpass'; fl.Q.value = 1.1; fl.frequency.setValueAtTime(500, at); fl.frequency.exponentialRampToValueAtTime(6000, at + len);
+        a.gain.setValueAtTime(.0001, at); a.gain.linearRampToValueAtTime(.05, at + len * .1); a.gain.linearRampToValueAtTime(.17, at + len * .85); a.gain.linearRampToValueAtTime(.0001, at + len);
+        src.connect(fl); fl.connect(a); a.connect(out); src.start(at); src.stop(at + len + .05);
+      },
+      air: function (c, out, f, at, vol, len) {    /* a reverse-cymbal swell: air that builds and stops at the hit */
+        var src = noise(c, len + .1), fl = c.createBiquadFilter(), a = env(c, out, at, vol, len * .94, len);
+        fl.type = 'bandpass'; fl.Q.value = .7; fl.frequency.setValueAtTime(1800, at); fl.frequency.exponentialRampToValueAtTime(8000, at + len);
+        src.connect(fl); fl.connect(a); src.start(at); src.stop(at + len + .05);
+      }
+    };
+    var FLY = T1 - T0;
+    var PLAN = {   /* per kind and per cue: [seconds after the cue, note, loudness, length, voice (default bell), attack] */
       bell: {
         fly: [[.12, 'A6', .05, 1.1], [.40, 'B6', .055, 1.1], [.66, 'D7', .06, 1.1], [.86, 'F7', .06, 1.0], [1.0, 'A7', .07, 1.0]],
         hit: [[0, 'D6', .20, 2.6], [0, 'A6', .12, 2.2], [.01, 'D7', .09, 1.8], [.07, 'F7', .06, 1.2], [.15, 'A7', .05, 1.1], [.24, 'D7', .05, 1.2], [.34, 'F7', .035, 1.0], [.46, 'A6', .03, 1.2]]
       },
       whoosh: {
-        fly: [],
+        fly: [[0, 'D6', 0, FLY, 'sweep']],
         hit: [[0, 'D7', .15, 1.4], [0, 'A7', .08, 1.0], [.08, 'F7', .05, 1.1], [.18, 'A7', .045, 1.0], [.30, 'D7', .035, 1.1]]
+      },
+      harp: {   /* a rising run of the strings, then a full strum */
+        fly: [[.05, 'D5', .06, 1.2, 'pluck'], [.20, 'F5', .06, 1.2, 'pluck'], [.34, 'A5', .06, 1.2, 'pluck'], [.47, 'B5', .06, 1.2, 'pluck'], [.58, 'D6', .06, 1.2, 'pluck'], [.69, 'F6', .06, 1.2, 'pluck'], [.79, 'A6', .06, 1.1, 'pluck'], [.88, 'B6', .06, 1.1, 'pluck'], [.96, 'D7', .06, 1.1, 'pluck'], [1.04, 'F7', .055, 1.0, 'pluck']],
+        hit: [[0, 'D5', .17, 2.8, 'pluck'], [.035, 'A5', .13, 2.6, 'pluck'], [.07, 'F6', .12, 2.4, 'pluck'], [.105, 'D6', .12, 2.4, 'pluck'], [.14, 'A6', .10, 2.2, 'pluck'], [.18, 'D7', .08, 2.0, 'pluck'], [.22, 'F7', .06, 1.8, 'pluck']]
+      },
+      box: {    /* a music box: a few notes falling with the star, then a gentle shower */
+        fly: [[.15, 'D7', .05, .9, 'box'], [.42, 'B6', .05, .9, 'box'], [.68, 'A6', .05, .9, 'box'], [.90, 'F6', .055, .9, 'box']],
+        hit: [[0, 'D6', .15, 2.2, 'box'], [0, 'D7', .09, 1.8, 'box'], [.12, 'A6', .08, 1.6, 'box'], [.24, 'F7', .065, 1.5, 'box'], [.36, 'A7', .05, 1.4, 'box'], [.50, 'D7', .04, 1.4, 'box'], [.64, 'A6', .03, 1.4, 'box']]
+      },
+      glow: {   /* no sharp sounds at all: a warm chord grows under the music and opens at the hit */
+        fly: [[0, 'D3', .11, FLY, 'pad', FLY * .92], [0, 'A3', .08, FLY, 'pad', FLY * .92], [0, 'D4', .06, FLY, 'pad', FLY * .92]],
+        hit: [[0, 'D4', .13, 3.4, 'pad', .35], [0, 'F4', .10, 3.4, 'pad', .35], [0, 'A4', .10, 3.4, 'pad', .35], [0, 'D5', .08, 3.2, 'pad', .35], [.05, 'D6', .045, 2.2], [.22, 'A6', .03, 1.8]]
+      },
+      cine: {   /* a swell, a soft thump, a single bell on top */
+        fly: [[0, 'D6', .10, FLY, 'air'], [0, 'D3', .07, FLY, 'pad', FLY * .95]],
+        hit: [[0, 'D3', .45, 1.3, 'boom'], [0, 'D4', .10, 2.6, 'pad', .2], [0, 'D6', .11, 2.4], [0, 'A6', .06, 2.0], [.1, 'D7', .04, 1.5]]
       }
     };
-    function play(c, bus, kind, which, at, late) {   /* at = the moment the video reaches the cue; late = how far past it we already are */
-      var list = (PLAN[kind] || PLAN.bell)[which];
-      list.forEach(function (e) { if (e[0] < late - .05) return; bell(c, bus, N[e[1]], at + Math.max(0, e[0] - late), e[2], e[3]); });
-      if (kind === 'whoosh' && which === 'fly') sweep(c, bus, at, Math.min(1, late / (T1 - T0)), (T1 - T0) - late);
+    var TRIM = { harp: { hit: .8 }, box: { fly: 1.4, hit: 1.5 }, glow: { fly: .6, hit: .85 }, cine: { hit: .55 } };   /* evens out the loudness of the variants */
+    function play(c, bus, kind, which, at, late) {
+      var trim = (TRIM[kind] && TRIM[kind][which]) || 1;   /* at = the moment the video reaches the cue; late = how far past it we already are */
+      ((PLAN[kind] || PLAN.bell)[which]).forEach(function (e) {
+        if (e[0] < late - .15) return;
+        VOICE[e[4] || 'bell'](c, bus, N[e[1]], at + Math.max(0, e[0] - late), e[2] * trim, e[3] - Math.max(0, late - e[0]) * (e[4] === 'sweep' || e[4] === 'air' || e[4] === 'pad' ? 1 : 0), e[5]);
+      });
     }
     function ensureAudio() {
       if (SOUND === 'off' || v.muted) return;
