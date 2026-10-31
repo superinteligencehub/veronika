@@ -167,6 +167,25 @@ video { display: block; width: 100%; height: 100%; object-fit: contain; backgrou
 .act { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 50px; padding: 0 12px; border-radius: 14px; border: 1px solid var(--line); background: rgba(255,255,255,.05); color: var(--cream); text-decoration: none; text-align: center; cursor: pointer; font: 700 15px/1.15 var(--body); }
 .act svg { width: 18px; height: 18px; flex: none; color: var(--gold); }
 .act.wide { grid-column: 1 / -1; }
+/* special effects: golden 3D "1" intro (WebGL), dust over the video, sparkle trail */
+#fx { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; display: none; pointer-events: none; }
+.fx-on #fx { display: block; }
+.fx-on video { opacity: 0; transition: opacity .9s ease; }
+.fx-on.fx-open video { opacity: 1; }
+#trail { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 9; pointer-events: none; }
+.play.fx { left: 0; top: 0; width: 100%; height: 100%; transform: none; border-radius: 0; background: none; box-shadow: none; animation: none; z-index: 3; }
+.play.fx i { display: none; }
+.intro { position: absolute; inset: 0; z-index: 2; display: none; flex-direction: column; align-items: center; justify-content: flex-end; padding: 0 16px 15%; text-align: center; pointer-events: none; transition: opacity .6s ease; }
+.fx-on .intro { display: flex; }
+.fx-open .intro { opacity: 0; }
+.fx-opening .intro { opacity: 0; transition: opacity .35s ease; }
+.foil { background: linear-gradient(100deg, #d0a04a 0%, #fbe9ae 28%, #fff7dc 44%, #e2b85a 62%, #f7de9a 84%, #c0903a 100%); background-size: 220% 100%;
+  -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 2px 0 rgba(90, 55, 10, .5)) drop-shadow(0 0 22px rgba(255, 205, 110, .3)); animation: foilmove 8s ease-in-out infinite; }
+@keyframes foilmove { 0%, 100% { background-position: 0% 0; } 50% { background-position: 100% 0; } }
+.intro .t1 { padding: 0 .1em .12em; font: italic 600 clamp(40px, 13vw, 60px)/1.05 Georgia, "Times New Roman", serif; transform: translate(calc(var(--px, 0) * -12px), calc(var(--py, 0) * -7px)); }
+.intro .t2 { margin: 12px 0 0; font: 500 11.5px/1 var(--body); letter-spacing: .34em; padding-left: .34em; text-transform: uppercase; color: var(--gold); animation: hint 2.6s ease-in-out infinite; }
+@keyframes hint { 0%, 100% { opacity: .45; } 50% { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
 @media (min-width: 700px) { video { border-radius: 14px; } }
 </style>
@@ -175,6 +194,9 @@ video { display: block; width: 100%; height: 100%; object-fit: contain; backgrou
 <div class="app">
   <div class="stage">
     <video id="v" src="invite.mp4" poster="poster.jpg" playsinline webkit-playsinline preload="auto" aria-label="Видео-приглашение на первый день рождения Вероники"></video>
+    <canvas id="fx" aria-hidden="true"></canvas>
+    <div class="intro" aria-hidden="true"><div class="t1 foil">Вероника</div><p class="t2">Нажмите, чтобы открыть</p></div>
+    <canvas id="trail" aria-hidden="true"></canvas>
     <button class="play" id="play" type="button" aria-label="Открыть приглашение"><i></i></button>
     <button class="fsbtn" id="fs" type="button" hidden aria-label="На весь экран" title="На весь экран">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path id="fsIcon" d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
@@ -330,40 +352,369 @@ video { display: block; width: 100%; height: 100%; object-fit: contain; backgrou
     if (pend) setTimeout(function () { if (pend) showThanks(pend); }, 350);
     else if (thanks.classList.contains('on') && !still && thanks.dataset.kind !== 'no') setTimeout(confetti, 350);
   });
+  /* gold fireworks: rockets rise and burst into spheres, rings and a heart; trails fade on a transparent canvas */
   function confetti() {
     cancelAnimationFrame(raf);
     var dpr = Math.min(window.devicePixelRatio || 1, 2), w = cv.clientWidth, h = cv.clientHeight;
     cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr);
     var g = cv.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0);
-    var COL = ['#ffe29a', '#e6c27a', '#f4e8cc', '#ffffff', '#e0a852', '#9fd8cb'], P = [], R = Math.random;
-    function add(x, y, vx, vy, delay) {
-      P.push({ x: x, y: y, vx: vx, vy: vy, d: delay || 0, c: COL[(R() * COL.length) | 0], w: 6 + R() * 6, h: 9 + R() * 8, a: R() * 6.28, va: (R() - .5) * 9,
-        t: R() * 6.28, vt: 4 + R() * 6, round: R() < .22 });
-    }
-    var k = Math.min(w, 460) / 400;
-    for (var i = 0; i < 70; i++) { /* two bursts from the bottom corners */
-      var s = (620 + R() * 760) * k, a = -(Math.PI / 2) + (R() - .5) * 0.95;
-      add(-6, h * .86, Math.abs(Math.cos(a)) * s * .9 + 60, Math.sin(a) * s - 120, R() * .25);
-      add(w + 6, h * .86, -(Math.abs(Math.cos(a)) * s * .9 + 60), Math.sin(a) * s - 120, R() * .25);
-    }
-    for (var j = 0; j < 70; j++) add(R() * w, -20 - R() * h * .35, (R() - .5) * 90, 90 + R() * 150, .5 + R() * 1.6); /* gentle rain */
-    var t0 = performance.now(), last = t0;
-    (function step(now) {
-      var dt = Math.min((now - last) / 1000, .05), el = (now - t0) / 1000; last = now;
-      g.clearRect(0, 0, w, h); var live = 0;
-      for (var n2 = 0; n2 < P.length; n2++) {
-        var p = P[n2]; if (el < p.d) { live++; continue; }
-        p.vy += 760 * dt; var drag = Math.pow(.18, dt); p.vx *= drag; if (p.vy < 0) p.vy *= drag; else p.vy = Math.min(p.vy, 260 + p.w * 6);
-        p.x += (p.vx + Math.sin(p.t) * 28) * dt; p.y += p.vy * dt; p.a += p.va * dt; p.t += p.vt * dt;
-        if (p.y > h + 30) continue; live++;
-        var flip = Math.cos(p.t); g.save(); g.translate(p.x, p.y); g.rotate(p.a); g.scale(1, flip); g.fillStyle = p.c;
-        g.globalAlpha = Math.min(1, (h + 30 - p.y) / 120 + .3);
-        if (p.round) { g.beginPath(); g.arc(0, 0, p.w / 2.2, 0, 6.28); g.fill(); } else g.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
-        g.restore();
+    var COL = ['255,226,154', '255,196,92', '255,244,214', '159,216,203', '255,168,120'], R = Math.random;
+    var K = Math.min(w, 460) / 400, rockets = [], sparks = [], t0 = performance.now(), last = t0, fired = 0;
+    /* [delay s, x, y (fractions of the screen), kind] */
+    var plan = [[0, .28, .30, 'sphere'], [.45, .72, .24, 'ring'], [.9, .5, .38, 'heart'], [1.6, .22, .52, 'sphere'], [2, .8, .46, 'sphere'],
+                [2.6, .5, .24, 'ring'], [3.2, .3, .40, 'sphere'], [3.6, .7, .34, 'heart'], [4.3, .5, .30, 'sphere']];
+    function mk(x, y, vx, vy, c, life, grav) { return { x: x, y: y, vx: vx, vy: vy, c: c, life: life, age: 0, s: 1 + R() * 1.4, grav: grav == null ? 1 : grav }; }
+    function burst(x, y, kind) {
+      var c1 = COL[(R() * COL.length) | 0], c2 = COL[(R() * COL.length) | 0], n = kind === 'heart' ? 96 : kind === 'ring' ? 72 : 120, i;
+      for (i = 0; i < n; i++) {
+        if (kind === 'heart') {
+          var q = i / n * 6.2832, hx = 16 * Math.pow(Math.sin(q), 3), hy = -(13 * Math.cos(q) - 5 * Math.cos(2 * q) - 2 * Math.cos(3 * q) - Math.cos(4 * q));
+          sparks.push(mk(x, y, hx * 9 * K, hy * 9 * K, c1, 1.5 + R() * .3, .25));
+        } else {
+          var a = R() * 6.2832, sp = kind === 'ring' ? 190 * K * (1 + (R() - .5) * .05) : (40 + R() * 230) * K;
+          sparks.push(mk(x, y, Math.cos(a) * sp, Math.sin(a) * sp * (kind === 'ring' ? .45 : 1), R() < .3 ? c2 : c1, kind === 'ring' ? 1.5 : 1.1 + R() * .6, .7));
+        }
       }
-      if (live && el < 9) raf = requestAnimationFrame(step); else g.clearRect(0, 0, w, h);
+    }
+    (function step(now) {
+      var dt = Math.min((now - last) / 1000, .05), el = (now - t0) / 1000, i, p;
+      last = now;
+      while (fired < plan.length && el >= plan[fired][0]) {
+        var sh = plan[fired++];
+        rockets.push({ x0: w * (.35 + R() * .3), y0: h + 10, x: 0, y: 0, tx: w * sh[1], ty: h * sh[2], kind: sh[3], t: 0, dur: .7 + R() * .15 });
+      }
+      g.globalCompositeOperation = 'destination-out';
+      g.fillStyle = 'rgba(0,0,0,' + (1 - Math.exp(-11 * dt)) + ')';
+      g.fillRect(0, 0, w, h);
+      g.globalCompositeOperation = 'lighter';
+      for (i = rockets.length - 1; i >= 0; i--) {
+        p = rockets[i]; p.t += dt / p.dur;
+        var e = 1 - Math.pow(1 - Math.min(p.t, 1), 2);
+        p.x = p.x0 + (p.tx - p.x0) * e + Math.sin(p.t * 9) * 4; p.y = p.y0 + (p.ty - p.y0) * e;
+        sparks.push(mk(p.x, p.y, (R() - .5) * 30, 20 + R() * 40, '255,214,140', .35, .5));
+        g.fillStyle = 'rgba(255,240,200,.95)'; g.beginPath(); g.arc(p.x, p.y, 2.2, 0, 6.2832); g.fill();
+        if (p.t >= 1) { burst(p.x, p.y, p.kind); rockets.splice(i, 1); }
+      }
+      if (el < 5 && R() < dt * 16) sparks.push(mk(R() * w, -8, (R() - .5) * 14, 36 + R() * 50, COL[(R() * 3) | 0], 4, 0));
+      var drag = Math.pow(.35, dt);
+      for (i = sparks.length - 1; i >= 0; i--) {
+        p = sparks[i]; p.age += dt;
+        var a = 1 - p.age / p.life;
+        if (a <= 0 || p.y > h + 20) { sparks.splice(i, 1); continue; }
+        if (p.grav) { p.vx *= drag; p.vy = p.vy * drag + 120 * p.grav * dt; }
+        p.x += p.vx * dt; p.y += p.vy * dt;
+        g.fillStyle = 'rgba(' + p.c + ',' + (a * a * .16) + ')'; g.beginPath(); g.arc(p.x, p.y, p.s * 3.4, 0, 6.2832); g.fill();
+        g.fillStyle = 'rgba(' + p.c + ',' + Math.min(1, a * (.75 + R() * .25)) + ')'; g.beginPath(); g.arc(p.x, p.y, p.s, 0, 6.2832); g.fill();
+      }
+      if ((el < 6.5 || rockets.length || sparks.length) && el < 12) raf = requestAnimationFrame(step); else g.clearRect(0, 0, w, h);
     })(t0);
   }
+
+  /* ---- special effects layer: a raymarched golden "1" in a nebula, gold dust over the video, sparkle trail ---- */
+  var stageEl = document.querySelector('.stage');
+  var FX = (function () {
+    var fcv = document.getElementById('fx'), gl = null, U = {}, ok = false, raf2 = 0;
+    var pt = { x: 0, y: 0 }, tg = { x: 0, y: 0 }, lastIn = -9999, openAt = -1, cb = null, cbDone = false, opened = false;
+    var t0 = 0, last = 0, ft = .016, nf = 0, scale = 1;
+    var VS = 'attribute vec2 a;void main(){gl_Position=vec4(a,0.,1.);}';
+    var FS = `precision highp float;
+uniform vec2 uRes;
+uniform vec2 uPtr;
+uniform float uTime;
+uniform float uOpen;
+uniform float uScene;
+uniform float uFlash;
+uniform float uDust;
+
+float hash21(vec2 p){ vec3 p3 = fract(vec3(p.xyx) * .1031); p3 += dot(p3, p3.yzx + 33.33); return fract((p3.x + p3.y) * p3.z); }
+vec2 hash22(vec2 p){ vec3 p3 = fract(vec3(p.xyx) * vec3(.1031, .1030, .0973)); p3 += dot(p3, p3.yzx + 33.33); return fract((p3.xx + p3.yz) * p3.zy); }
+float noise(vec2 p){
+  vec2 i = floor(p), f = fract(p); f = f * f * (3. - 2. * f);
+  return mix(mix(hash21(i), hash21(i + vec2(1., 0.)), f.x), mix(hash21(i + vec2(0., 1.)), hash21(i + vec2(1., 1.)), f.x), f.y);
+}
+float fbm(vec2 p){
+  float a = .5, s = 0.;
+  mat2 m = mat2(1.6, 1.2, -1.2, 1.6);
+  for (int i = 0; i < 5; i++) { s += a * noise(p); p = m * p; a *= .5; }
+  return s;
+}
+
+/* ---- the numeral 1: stem, flag and foot, smoothly joined, extruded with a rounded bevel ---- */
+float sdBox(vec2 p, vec2 b){ vec2 d = abs(p) - b; return length(max(d, 0.)) + min(max(d.x, d.y), 0.); }
+float sdSeg(vec2 p, vec2 a, vec2 b){ vec2 pa = p - a, ba = b - a; float h = clamp(dot(pa, ba) / dot(ba, ba), 0., 1.); return length(pa - ba * h); }
+float smin(float a, float b, float k){ float h = clamp(.5 + .5 * (b - a) / k, 0., 1.); return mix(b, a, h) - k * h * (1. - h); }
+float shape(vec2 p){
+  float stem = sdBox(p - vec2(.08, 0.), vec2(.13, .92)) - .02;
+  float flag = sdSeg(p, vec2(.10, .86), vec2(-.46, .46)) - .105;
+  float foot = sdBox(p - vec2(.08, -.90), vec2(.42, .065)) - .03;
+  float d = smin(stem, flag, .10);
+  return smin(d, foot, .05);
+}
+float map(vec3 p){
+  float d2 = shape(p.xy);
+  float R = .05, H = .16;
+  vec2 w = vec2(d2 + R, abs(p.z) - (H - R));
+  return min(max(w.x, w.y), 0.) + length(max(w, 0.)) - R;
+}
+vec3 nor(vec3 p){
+  vec2 e = vec2(1., -1.) * .0015;
+  return normalize(e.xyy * map(p + e.xyy) + e.yyx * map(p + e.yyx) + e.yxy * map(p + e.yxy) + e.xxx * map(p + e.xxx));
+}
+mat3 rotY(float a){ float c = cos(a), s = sin(a); return mat3(c, 0., -s, 0., 1., 0., s, 0., c); }
+mat3 rotX(float a){ float c = cos(a), s = sin(a); return mat3(1., 0., 0., 0., c, s, 0., -s, c); }
+
+/* ---- studio the gold reflects: emerald room, gold horizon, tall softboxes, a hot spot ---- */
+vec3 env(vec3 d){
+  float y = d.y;
+  vec3 c = mix(vec3(.010, .040, .035), vec3(.060, .340, .270), smoothstep(-.7, .9, y));
+  float hz = (y + .05) * 4.;
+  c += vec3(1., .55, .15) * exp(-hz * hz) * .55;
+  float a = atan(d.x, d.z);
+  float s1 = smoothstep(.16, .04, abs(a - 1.05)) * smoothstep(.95, .35, abs(y - .1));
+  float s2 = smoothstep(.12, .03, abs(a + 1.6)) * smoothstep(.90, .30, abs(y + .05));
+  float s3 = smoothstep(.55, .20, length(vec2(a - 2.7, y - .7)));
+  float top = smoothstep(.78, .95, y);
+  c += vec3(1., .93, .78) * (s1 * 5. + s2 * 3.5 + top * 2.2);
+  c += vec3(.7, 1., .9) * s3 * 1.5;
+  float wl = length(vec2(a * .9, y * 1.5));
+  c += vec3(1., .80, .50) * smoothstep(1.3, .0, wl) * 1.15;
+  c += vec3(1., .85, .5) * pow(max(dot(d, normalize(vec3(-.4, .5, .7))), 0.), 220.) * 18.;
+  return c;
+}
+
+/* ---- emerald nebula with slow light shafts ---- */
+vec3 bg(vec2 uv){
+  vec2 p = uv * 2. + uPtr * .12;
+  float t = uTime * .03;
+  float n = fbm(p * 1.3 + vec2(t, -t * .7));
+  float n2 = fbm(p * 2.6 - vec2(t * 1.4, t) + n);
+  vec3 c = mix(vec3(.008, .035, .030), vec3(.050, .240, .190), smoothstep(.25, .75, n));
+  c += vec3(.45, .40, .18) * n2 * n2 * n2 * .5;
+  vec2 q = uv * vec2(1., .8) - vec2(0., .12);
+  c += vec3(.12, .30, .22) * exp(-length(q) * 3.) * .7;
+  vec2 o = vec2(-.15, .75), dv = uv - o;
+  float ang = atan(dv.x, -dv.y), len = length(dv);
+  float rays = pow(max(0., sin(ang * 11. + uTime * .15 + n * 2.) * .5 + .5), 4.) * .5
+             + pow(max(0., sin(ang * 23. - uTime * .10) * .5 + .5), 6.) * .3;
+  c += vec3(1., .8, .45) * rays * exp(-len * 1.6) * .22;
+  c *= 1. - smoothstep(.35, .95, length(uv * vec2(1.2, .8))) * .55;
+  return c * .55;
+}
+
+/* ---- four layers of gold dust at different depths: small sharp sparks far away, soft bokeh rings near ---- */
+vec3 dust(vec2 uv){
+  vec3 acc = vec3(0.);
+  for (int i = 0; i < 4; i++) {
+    float fi = float(i);
+    float sc = 15. - fi * 3.6;
+    float size = .05 + fi * .045;
+    float v = .02 + fi * .015;
+    float par = .03 + fi * .07;
+    vec2 q = uv * sc + vec2(fi * 7.3, -uTime * v * sc) + uPtr * par * sc;
+    vec2 g = floor(q), f = fract(q) - .5;
+    float rnd = hash21(g + fi * 17.3);
+    vec2 cp = (hash22(g + fi * 5.1) - .5) * .3;
+    float keep = step(.42, rnd);
+    float r = size * (.45 + .7 * hash21(g * 1.7 + fi));
+    float d = length(f - cp);
+    float tw = .5 + .5 * sin(uTime * (.8 + rnd * 2.5) + rnd * 40.);
+    float disc = 1. - smoothstep(r * .82, r, d);
+    float core = exp(-d * d / (r * r * .12));
+    float ring = smoothstep(r * .5, r * .92, d) * disc;
+    float val = mix(core + disc * .12, ring * .5 + disc * .2, fi / 3.);
+    vec3 c = mix(vec3(1., .70, .28), vec3(1., .93, .74), hash21(g + 9.) * (1. - fi * .22));
+    acc += c * val * tw * keep * (.9 - fi * .12);
+  }
+  return acc;
+}
+
+void main(){
+  vec2 uv = (gl_FragCoord.xy - .5 * uRes) / uRes.y;
+  float open = uOpen;
+  /* shock ring when the numeral is opened */
+  vec2 dv0 = uv - vec2(0., .12);
+  float rad = length(dv0);
+  float qq = (rad - open * 1.6) * 7.;
+  uv += dv0 / (rad + 1e-4) * exp(-qq * qq) * sin(open * 3.14159) * .045;
+
+  vec3 col = vec3(0.);
+  if (uScene > .001) {
+    vec3 sc = bg(uv);
+    vec3 ta = vec3(0., .12, 0.);
+    vec3 ro = vec3(uPtr.x * .8, .12 + uPtr.y * .45, 6.9);
+    vec3 fw = normalize(ta - ro);
+    vec3 rt = normalize(cross(fw, vec3(0., 1., 0.)));
+    vec3 up = cross(rt, fw);
+    vec3 rd = normalize(uv.x * rt + uv.y * up + 1.7 * fw);
+
+    float S = 1. + open * open * .9;
+    vec3 c0 = vec3(0., .52 + sin(uTime * .9) * .05, 0.);
+    float cyc = mod(uTime, 10.);
+    float turn = smoothstep(6.5, 9.5, cyc) * 6.28318;
+    float ay = turn + uPtr.x * .55 + sin(uTime * .45) * .18 + open * open * 7.;
+    float ax = -uPtr.y * .3 + sin(uTime * .37) * .08;
+    mat3 M = rotX(ax) * rotY(ay);
+
+    vec3 oc = ro - c0;
+    float b = dot(oc, rd);
+    float hh = dot(oc, oc) - b * b;
+    float Rb = 1.5 * S;
+    float pulse = .8 + .2 * sin(uTime * 1.3);
+    sc += vec3(1., .72, .30) * exp(-hh * 1.1 / (S * S)) * .32 * pulse;
+
+    float tHit = -1., glow = 0.;
+    if (hh < Rb * Rb) {
+      float sq = sqrt(Rb * Rb - hh);
+      float t = max(-b - sq, 0.), tEnd = -b + sq;
+      for (int i = 0; i < 72; i++) {
+        vec3 po = M * (ro + rd * t - c0) / S;
+        float d = map(po) * S;
+        glow += exp(-7. * d) * .02;
+        if (d < .0015) { tHit = t; break; }
+        t += d * .9;
+        if (t > tEnd) break;
+      }
+    }
+    sc += vec3(1., .70, .28) * glow * .9;
+    if (tHit > 0.) {
+      vec3 po = M * (ro + rd * tHit - c0) / S;
+      vec3 no = nor(po);
+      vec3 n = no * M;
+      vec3 rf = reflect(rd, n);
+      float ndv = clamp(dot(n, -rd), 0., 1.);
+      vec3 F0 = vec3(1., .77, .34);
+      vec3 F = F0 + (1. - F0) * pow(1. - ndv, 5.);
+      float occ = 0., sca = 1.;
+      for (int j = 0; j < 5; j++) {
+        float h = .01 + .12 * float(j) / 4.;
+        occ += (h - map(po + no * h)) * sca;
+        sca *= .85;
+      }
+      float ao = clamp(1. - 1.8 * occ, 0., 1.);
+      vec3 spec = env(rf) * F;
+      vec3 obj = spec * ao + F0 * .10 * ao * (.4 + env(n)) + vec3(.05, .5, .4) * pow(1. - ndv, 3.) * .30;
+      sc = mix(sc, obj, 1.) + vec3(1., .75, .3) * glow * .25;
+    }
+    col = sc * uScene;
+  }
+  col += dust(uv) * mix(1., uDust, 1. - uScene);
+  col = max(col, 0.);
+  /* filmic tone curve, then a little grain */
+  col = (col * (2.51 * col + .03)) / (col * (2.43 * col + .59) + .14);
+  vec3 fl = mix(vec3(1., .96, .82), vec3(1., .74, .30), smoothstep(0., .8, length(uv - vec2(0., .1))));
+  col = mix(col, fl, uFlash);
+  col += (hash21(gl_FragCoord.xy + fract(uTime) * 91.) - .5) * .022 * uScene;
+  gl_FragColor = vec4(max(col, 0.), 1.);
+}`;
+    function clamp(x, a, b) { return Math.max(a, Math.min(b, x)); }
+    function smooth(a, b, x) { x = clamp((x - a) / (b - a), 0, 1); return x * x * (3 - 2 * x); }
+    function sh(type, src) {
+      var s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s);
+      if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) { if (window.console) console.error('shader: ' + gl.getShaderInfoLog(s)); return null; }
+      return s;
+    }
+    function init() {
+      if (still || !fcv) return;
+      try { gl = fcv.getContext('webgl', { alpha: false, antialias: false, powerPreference: 'high-performance' }); } catch (e) { gl = null; }
+      if (!gl) return;
+      var pf = gl.getShaderPrecisionFormat && gl.getShaderPrecisionFormat(gl.FRAGMENT_SHADER, gl.HIGH_FLOAT);
+      if (!pf || !pf.precision) return;
+      var vs = sh(gl.VERTEX_SHADER, VS), fs = sh(gl.FRAGMENT_SHADER, FS);
+      if (!vs || !fs) return;
+      var pr = gl.createProgram(); gl.attachShader(pr, vs); gl.attachShader(pr, fs); gl.linkProgram(pr);
+      if (!gl.getProgramParameter(pr, gl.LINK_STATUS)) return;
+      gl.useProgram(pr);
+      var buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+      var loc = gl.getAttribLocation(pr, 'a'); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+      ['uRes', 'uPtr', 'uTime', 'uOpen', 'uScene', 'uFlash', 'uDust'].forEach(function (n) { U[n] = gl.getUniformLocation(pr, n); });
+      ok = true; api.ok = true;
+      stageEl.classList.add('fx-on'); play.classList.add('fx');
+      window.addEventListener('pointermove', function (e) {
+        var r = fcv.getBoundingClientRect(); if (!r.width) return;
+        tg.x = clamp((e.clientX - (r.left + r.width / 2)) / (r.width / 2), -1, 1);
+        tg.y = -clamp((e.clientY - (r.top + r.height / 2)) / (r.height / 2), -1, 1);
+        lastIn = performance.now();
+      });
+      document.addEventListener('visibilitychange', function () { if (document.hidden) cancelAnimationFrame(raf2); else begin(); });
+      begin();
+    }
+    function begin() { cancelAnimationFrame(raf2); last = performance.now(); if (!t0) t0 = last; raf2 = requestAnimationFrame(frame); }
+    function resize(k) {
+      var r = fcv.getBoundingClientRect(), d = Math.min(window.devicePixelRatio || 1, 1.5) * scale * k;
+      var w = Math.max(2, Math.round(r.width * d)), h = Math.max(2, Math.round(r.height * d));
+      if (fcv.width !== w || fcv.height !== h) { fcv.width = w; fcv.height = h; gl.viewport(0, 0, w, h); }
+    }
+    function frame(now) {
+      raf2 = requestAnimationFrame(frame);
+      var dt = Math.min((now - last) / 1000, .1); last = now;
+      ft = ft * .95 + dt * .05;
+      if (++nf > 50 && ft > .034 && scale > .5) { scale *= .8; nf = 0; ft = .016; }
+      var t = (now - t0) / 1000;
+      if (now - lastIn > 2500) { tg.x = Math.sin(t * .35) * .5; tg.y = Math.cos(t * .27) * .3; }
+      var k = Math.min(1, dt * 4); pt.x += (tg.x - pt.x) * k; pt.y += (tg.y - pt.y) * k;
+      var o = 0, scene = 1, flash = 0, dust = 1;
+      if (openAt >= 0) {
+        var e = (now - openAt) / 1000;
+        o = Math.min(1, e / 1.1); flash = smooth(.3, .95, e) * (1 - smooth(.95, 1.7, e));
+        scene = 1 - smooth(.95, 2, e); dust = 1 - .45 * smooth(1, 2, e);
+        if (!cbDone && e >= .95) { cbDone = true; fcv.style.mixBlendMode = 'screen'; if (cb) cb(); }
+      }
+      resize(scene > 0 ? 1 : .6);
+      gl.uniform2f(U.uRes, fcv.width, fcv.height); gl.uniform2f(U.uPtr, pt.x, pt.y); gl.uniform1f(U.uTime, t);
+      gl.uniform1f(U.uOpen, o); gl.uniform1f(U.uScene, scene); gl.uniform1f(U.uFlash, flash); gl.uniform1f(U.uDust, dust);
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+      stageEl.style.setProperty('--px', pt.x.toFixed(3)); stageEl.style.setProperty('--py', pt.y.toFixed(3));
+    }
+    function gyro(e) {
+      if (e.gamma == null) return;
+      tg.x = clamp(e.gamma / 22, -1, 1); tg.y = clamp(-(e.beta - 50) / 22, -1, 1); lastIn = performance.now();
+    }
+    function enableGyro() {
+      try {
+        if (window.DeviceOrientationEvent && DeviceOrientationEvent.requestPermission) {
+          DeviceOrientationEvent.requestPermission().then(function (s) { if (s === 'granted') window.addEventListener('deviceorientation', gyro); }).catch(function () {});
+        } else if (window.DeviceOrientationEvent) window.addEventListener('deviceorientation', gyro);
+      } catch (e) {}
+    }
+    var api = {
+      ok: false,
+      opened: function () { return opened; },
+      open: function (fn) { openAt = performance.now(); cb = fn; cbDone = false; opened = true; stageEl.classList.add('fx-opening'); enableGyro(); },
+      reset: function () { openAt = -1; cbDone = false; opened = false; fcv.style.mixBlendMode = 'normal'; stageEl.classList.remove('fx-open', 'fx-opening'); play.classList.add('fx'); }
+    };
+    init();
+    return api;
+  })();
+
+  /* sparkle trail behind a finger or the mouse */
+  (function () {
+    var tcv = document.getElementById('trail'); if (!tcv || still) return;
+    var g = tcv.getContext('2d'), P = [], running = false, last = 0, lx = -999, ly = -999, W = 0, H = 0, R = Math.random;
+    function size() { var r = tcv.getBoundingClientRect(), d = Math.min(window.devicePixelRatio || 1, 2); W = r.width; H = r.height; tcv.width = Math.round(W * d); tcv.height = Math.round(H * d); g.setTransform(d, 0, 0, d, 0, 0); }
+    function spawn(x, y) { for (var i = 0; i < 2; i++) P.push({ x: x + (R() - .5) * 10, y: y + (R() - .5) * 10, vx: (R() - .5) * 46, vy: -14 - R() * 50, a: 1, s: 1 + R() * 2, c: R() < .35 ? '255,244,214' : '255,206,120' }); }
+    function loop(now) {
+      var dt = Math.min((now - last) / 1000, .05); last = now;
+      g.clearRect(0, 0, W, H); g.globalCompositeOperation = 'lighter';
+      for (var i = P.length - 1; i >= 0; i--) {
+        var p = P[i]; p.a -= dt * 1.5; if (p.a <= 0) { P.splice(i, 1); continue; }
+        p.vy += 50 * dt; p.x += p.vx * dt; p.y += p.vy * dt;
+        g.fillStyle = 'rgba(' + p.c + ',' + (p.a * .18) + ')'; g.beginPath(); g.arc(p.x, p.y, p.s * 4, 0, 6.2832); g.fill();
+        g.fillStyle = 'rgba(' + p.c + ',' + p.a + ')'; g.beginPath(); g.arc(p.x, p.y, p.s, 0, 6.2832); g.fill();
+      }
+      if (P.length) requestAnimationFrame(loop); else running = false;
+    }
+    window.addEventListener('pointermove', function (e) {
+      var r = tcv.getBoundingClientRect(); if (!r.width) return;
+      if (tcv.width !== Math.round(r.width * Math.min(window.devicePixelRatio || 1, 2))) size();
+      var x = e.clientX - r.left, y = e.clientY - r.top;
+      if (x < 0 || y < 0 || x > r.width || y > r.height) return;
+      if (Math.hypot(x - lx, y - ly) < 7) return;
+      lx = x; ly = y; spawn(x, y);
+      if (!running) { running = true; last = performance.now(); requestAnimationFrame(loop); }
+    });
+    size();
+  })();
   var REVEAL = 15.2; /* seconds: the address is on screen from here */
   function reveal() { corner.classList.add('show'); }
   /* full screen without the address bar (Android and desktop; iPhone Safari does not allow it for pages) */
@@ -389,10 +740,14 @@ video { display: block; width: 100%; height: 100%; object-fit: contain; backgrou
   document.addEventListener('fullscreenchange', syncFs);
   document.addEventListener('webkitfullscreenchange', syncFs);
   fsBtn.addEventListener('click', function () { if (isFull()) exitFull(); else goFull(); setTimeout(syncFs, 400); });
+  function begin() {
+    var p = v.play(); if (p && p.catch) p.catch(function () { play.classList.remove('gone'); play.classList.remove('fx'); });
+  }
   function start() {
     goFull(); started = true; setTimeout(syncFs, 700);
     play.classList.add('gone');
-    var p = v.play(); if (p && p.catch) p.catch(function () { play.classList.remove('gone'); });
+    if (FX.ok && !FX.opened()) { FX.open(function () { stageEl.classList.add('fx-open'); play.classList.remove('fx'); begin(); }); return; }
+    begin();
   }
   play.addEventListener('click', start);
   v.addEventListener('click', function () {
