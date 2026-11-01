@@ -1,0 +1,663 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Приглашаем · v2 (черновик)</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="description" content="Нажмите, чтобы открыть приглашение">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Приглашаем">
+<meta property="og:description" content="Нажмите, чтобы открыть приглашение">
+<meta property="og:url" content="https://superinteligencehub.github.io/veronika/v2/">
+<meta property="og:image" content="https://superinteligencehub.github.io/veronika/v2/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#0a2423">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<style>
+html { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+body { margin: 0; }
+[hidden] { display: none !important; }
+/* Layout: the invitation video fills the screen. A small glass pill in the
+   bottom-right corner of the video opens the Waze route once the address is on screen. */
+:root {
+  --ink: #050e0f;
+  --gold: #e6c27a;
+  --gold-hi: #ffe29a;
+  --cream: #f4e8cc;
+  --glass: rgba(5, 14, 15, .58);
+  --line: rgba(230, 194, 122, .55);
+  --body: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  background: radial-gradient(70% 50% at 50% 38%, #123a37 0%, #0a2423 45%, #050e0f 100%) fixed, var(--ink);
+  color: var(--cream);
+  font-family: var(--body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0;
+  overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+.app { height: 100%; display: flex; align-items: center; justify-content: center; }
+.stage { position: relative; height: 100%; width: min(100%, calc(100svh * 9 / 16)); min-height: 0; }
+video { display: block; width: 100%; height: 100%; object-fit: contain; background: transparent; cursor: pointer; }
+
+.play {
+  position: absolute; left: 50%; top: 71%; transform: translate(-50%, -50%);
+  width: 104px; height: 104px; border-radius: 50%; border: 0; cursor: pointer; padding: 0;
+  background: radial-gradient(circle at 50% 28%, #2c6a66 0%, #0f3735 62%, #0a2423 100%);
+  box-shadow: 0 0 0 3px var(--gold), 0 0 0 5px rgba(255,226,154,.25), 0 0 46px rgba(230,170,70,.5);
+  display: flex; align-items: center; justify-content: center;
+  animation: breathe 2.4s ease-in-out infinite;
+  transition: opacity .5s ease, visibility .5s;
+}
+.play i { width: 0; height: 0; margin-left: 8px; border-left: 30px solid #fcf4de; border-top: 19px solid transparent; border-bottom: 19px solid transparent; }
+.play.gone { opacity: 0; visibility: hidden; pointer-events: none; }
+@keyframes breathe { 0%, 100% { transform: translate(-50%, -50%) scale(1) } 50% { transform: translate(-50%, -50%) scale(1.06) } }
+
+.corner {
+  position: absolute; right: 10px; bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+  display: flex; align-items: center; gap: 8px;
+  opacity: 0; visibility: hidden; transform: translateY(6px);
+  transition: opacity 1s ease, transform 1s ease, visibility 1s;
+}
+.corner.show { opacity: 1; visibility: visible; transform: none; }
+.chip {
+  display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+  height: 40px; padding: 0 14px 0 12px; border-radius: 999px;
+  background: var(--glass); border: 1px solid var(--line);
+  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+  color: var(--cream); text-decoration: none; cursor: pointer;
+  font: 600 14px/1 var(--body); letter-spacing: .02em;
+  transition: background .2s ease, border-color .2s ease;
+}
+.chip:hover { background: rgba(20, 66, 62, .75); border-color: var(--gold); }
+.chip svg { width: 17px; height: 17px; flex: none; color: var(--gold); }
+/* A soft golden glow and a slow light sweep draw the eye to one button: "Подтвердить" first, "Детали" once the guest has answered */
+#rsvpOpen, #infoOpen { position: relative; overflow: hidden; isolation: isolate; }
+.chip.glow, .chip.glow:hover { background: linear-gradient(100deg, var(--gold-hi), #e0a852); border-color: rgba(255, 233, 170, .95); color: #0c2c2a; }
+.chip.glow svg { color: #0c2c2a; }
+#rsvpOpen::after, #infoOpen::after {
+  content: ""; position: absolute; top: -20%; bottom: -20%; left: 0; width: 46%; z-index: -1; pointer-events: none;
+  background: linear-gradient(100deg, transparent 0%, rgba(255, 244, 214, .8) 50%, transparent 100%);
+  transform: translateX(-160%) skewX(-18deg); opacity: 0;
+}
+#rsvpOpen::before, #infoOpen::before {   /* tiny twinkling sparkles inside the gold */
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; opacity: 0;
+  background:
+    radial-gradient(circle at 14% 32%, #fff 0 1.3px, transparent 2.6px),
+    radial-gradient(circle at 36% 74%, #fff6d8 0 1.1px, transparent 2.3px),
+    radial-gradient(circle at 58% 24%, #fff 0 1.4px, transparent 2.8px),
+    radial-gradient(circle at 81% 68%, #fff6d8 0 1.2px, transparent 2.5px),
+    radial-gradient(circle at 93% 30%, #fff 0 1px, transparent 2.2px);
+}
+.corner.show .chip.glow { animation: rsvpGlow 2.2s ease-in-out .6s infinite, rsvpBright 2.2s ease-in-out .6s infinite; }
+.corner.show .chip.glow::before { animation: rsvpTwinkle 1.7s ease-in-out .8s infinite; }
+.corner.show .chip.glow::after { animation: rsvpSheen 3s ease-in-out 1s infinite; }
+@keyframes rsvpGlow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 215, 120, 0), 0 0 14px rgba(255, 200, 90, .55), 0 0 34px rgba(235, 170, 60, .3); }
+  50% { box-shadow: 0 0 0 4px rgba(255, 225, 140, .3), 0 0 26px rgba(255, 208, 100, 1), 0 0 60px rgba(240, 175, 60, .7), 0 0 105px rgba(235, 165, 50, .38); }
+}
+@keyframes rsvpBright { 0%, 100% { filter: brightness(1) saturate(1); } 50% { filter: brightness(1.14) saturate(1.12); } }
+@keyframes rsvpTwinkle { 0%, 100% { opacity: .15; transform: scale(.96); } 45% { opacity: 1; transform: scale(1.04); } 70% { opacity: .35; } }
+@keyframes rsvpSheen {
+  0% { transform: translateX(-160%) skewX(-18deg); opacity: 0; }
+  12% { opacity: 1; }
+  45% { transform: translateX(330%) skewX(-18deg); opacity: 1; }
+  55%, 100% { transform: translateX(330%) skewX(-18deg); opacity: 0; }
+}
+/* "Детали" always breathes with a thin gold rim; after the guest has answered it switches to the full gold shine (.glow) */
+.corner.show #infoOpen:not(.glow) { border-color: rgba(230, 194, 122, .6); animation: rimBreath 3.4s ease-in-out infinite; }
+@keyframes rimBreath {
+  0%, 100% { border-color: rgba(230, 194, 122, .4); box-shadow: 0 0 0 0 rgba(240, 205, 130, 0), 0 0 5px rgba(240, 200, 110, .12); }
+  50% { border-color: rgba(255, 228, 160, 1); box-shadow: 0 0 0 1px rgba(255, 226, 154, .5), 0 0 15px rgba(245, 205, 110, .55); }
+}
+.chip.round { width: 40px; padding: 0; display: none; }
+.corner.ended .chip.round { display: inline-flex; }
+.chip:focus-visible, .play:focus-visible, video:focus-visible { outline: 3px solid var(--gold-hi); outline-offset: 3px; }
+.corner { flex-wrap: nowrap; justify-content: flex-end; max-width: calc(100% - 20px); gap: 6px; }
+.corner .chip { flex: none; white-space: nowrap; }
+@media (max-width: 420px) {
+  .chip { height: 38px; padding: 0 11px 0 10px; gap: 5px; font-size: 13px; }
+  .chip svg { width: 15px; height: 15px; }
+  .chip.round { width: 38px; padding: 0; }
+}
+@media (max-width: 330px) { .corner { flex-wrap: wrap; } }
+.sheet {
+  position: absolute; left: 10px; right: 10px; bottom: calc(10px + env(safe-area-inset-bottom, 0px)); z-index: 5;
+  padding: 18px 16px 16px; border-radius: 22px;
+  background: rgba(6, 22, 22, .94); border: 1px solid var(--line);
+  -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+  box-shadow: 0 -10px 50px rgba(0,0,0,.5);
+  transition: opacity .35s ease, transform .35s ease, visibility .35s;
+}
+.sheet[hidden] { display: block !important; opacity: 0; visibility: hidden; transform: translateY(16px); pointer-events: none; }
+.sheet h3 { margin: 0 0 14px; font: 600 22px/1.2 Georgia, "Times New Roman", serif; font-style: italic; color: var(--gold); text-align: center; }
+.sheet .x { position: absolute; top: 8px; right: 8px; width: 40px; height: 40px; border: 0; border-radius: 50%; background: none; color: var(--cream); cursor: pointer; font-size: 22px; line-height: 1; opacity: .8; }
+.field { display: block; width: 100%; height: 50px; padding: 0 16px; margin: 0 0 12px; border-radius: 14px; border: 1px solid var(--line); background: rgba(255,255,255,.06); color: var(--cream); font: 500 16px/1 var(--body); }
+.field::placeholder { color: rgba(244,232,204,.5); }
+.field:focus-visible { outline: 3px solid var(--gold-hi); outline-offset: 2px; }
+.choice { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 0 0 12px; }
+.opt { height: 50px; border-radius: 14px; border: 1px solid var(--line); background: rgba(255,255,255,.05); color: var(--cream); font: 700 16px/1 var(--body); cursor: pointer; transition: background .2s, color .2s, border-color .2s; }
+.opt[aria-pressed="true"] { background: linear-gradient(100deg, var(--gold-hi), #e0a852); color: #0c2c2a; border-color: transparent; }
+.opt:focus-visible, .step button:focus-visible, .go:focus-visible, .sheet .x:focus-visible { outline: 3px solid var(--gold-hi); outline-offset: 2px; }
+.step { display: flex; align-items: center; justify-content: space-between; margin: 0 0 14px; padding: 0 4px 0 16px; height: 50px; border-radius: 14px; border: 1px solid var(--line); background: rgba(255,255,255,.05); font: 600 16px/1 var(--body); }
+.step[hidden] { display: none !important; }
+.step div { display: flex; align-items: center; gap: 4px; }
+.step button { width: 42px; height: 42px; border: 0; border-radius: 50%; background: rgba(230,194,122,.16); color: var(--gold-hi); font: 700 22px/1 var(--body); cursor: pointer; }
+.step output { min-width: 30px; text-align: center; font-variant-numeric: tabular-nums; }
+.go { display: flex; align-items: center; justify-content: center; height: 54px; border-radius: 999px; text-decoration: none; font: 700 17px/1 var(--body); color: #0c2c2a; background: linear-gradient(100deg, var(--gold-hi), #e0a852); box-shadow: 0 8px 26px rgba(230,170,70,.3); transition: opacity .2s; }
+.go.off { opacity: .4; box-shadow: none; }
+.hint { margin: 10px 0 0; min-height: 1.2em; text-align: center; font-size: 13px; color: var(--cream); opacity: .85; }
+.fsbtn { position: absolute; top: 10px; right: 10px; z-index: 4; width: 40px; height: 40px; padding: 0; border-radius: 50%; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; color: var(--gold); background: var(--glass); border: 1px solid var(--line);
+  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
+.fsbtn svg { width: 18px; height: 18px; }
+.fsbtn:focus-visible { outline: 3px solid var(--gold-hi); outline-offset: 3px; }
+/* thank-you screen after the answer is sent */
+.thanks { position: absolute; inset: 0; z-index: 7; display: flex; align-items: center; justify-content: center; text-align: center; cursor: pointer;
+  background: radial-gradient(ellipse at 50% 46%, rgba(3, 14, 14, .72), rgba(3, 14, 14, .46) 70%);
+  -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px);
+  opacity: 0; visibility: hidden; transition: opacity .6s ease, visibility .6s; }
+.thanks.on { opacity: 1; visibility: visible; }
+.thanks canvas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.thanks-in { position: relative; padding: 0 24px; transform: translateY(14px) scale(.96); transition: transform .9s cubic-bezier(.2,.8,.2,1) .15s; }
+.thanks.on .thanks-in { transform: none; }
+.thanks h2 { margin: 0 0 14px; font: italic 600 clamp(34px, min(11.5vw, 6.6svh), 58px)/1.1 Georgia, "Times New Roman", serif; color: var(--gold-hi); text-shadow: 0 2px 0 rgba(120, 80, 20, .55), 0 0 34px rgba(255, 210, 120, .45); }
+.thanks p { margin: 0; font: 500 clamp(16px, min(4.6vw, 2.8svh), 22px)/1.45 var(--body); color: var(--cream); letter-spacing: .02em; }
+.thanks small { position: absolute; left: 0; right: 0; bottom: calc(66px + env(safe-area-inset-bottom, 0px)); font: 500 12px/1 var(--body); color: var(--cream); opacity: .5; letter-spacing: .06em; }
+/* details sheet: date, address, routes, calendar, album */
+#info, #sheet { max-height: calc(100% - 20px); overflow-y: auto; }
+.facts { display: grid; gap: 10px; margin: 0 0 12px; }
+.fact { display: flex; align-items: flex-start; gap: 12px; padding: 12px 14px; border-radius: 14px; border: 1px solid var(--line); background: rgba(255,255,255,.05); }
+.fact > svg { width: 22px; height: 22px; flex: none; margin-top: 1px; color: var(--gold); }
+.fact div { flex: 1; min-width: 0; }
+.fact b { display: block; font: 700 16px/1.3 var(--body); color: var(--cream); }
+.fact span { display: block; margin-top: 3px; font: 500 14px/1.35 var(--body); color: var(--cream); opacity: .78; }
+.copy { flex: none; align-self: center; height: 34px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--line); background: rgba(230,194,122,.12); color: var(--gold-hi); font: 600 13px/1 var(--body); cursor: pointer; }
+.copy:focus-visible, .act:focus-visible { outline: 3px solid var(--gold-hi); outline-offset: 2px; }
+.acts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.act { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 50px; padding: 0 12px; border-radius: 14px; border: 1px solid var(--line); background: rgba(255,255,255,.05); color: var(--cream); text-decoration: none; text-align: center; cursor: pointer; font: 700 15px/1.15 var(--body); }
+.act svg { width: 18px; height: 18px; flex: none; color: var(--gold); }
+.act.wide { grid-column: 1 / -1; }
+#star { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+@media (min-width: 700px) { video { border-radius: 14px; } }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="stage">
+    <video id="v" src="invite.mp4" poster="poster.jpg" playsinline webkit-playsinline preload="auto" aria-label="Видео-приглашение на первый день рождения Вероники"></video>
+    <canvas id="star" aria-hidden="true"></canvas>
+    <button class="play" id="play" type="button" aria-label="Открыть приглашение"><i></i></button>
+    <button class="fsbtn" id="fs" type="button" hidden aria-label="На весь экран" title="На весь экран">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path id="fsIcon" d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
+    </button>
+    <div class="sheet" id="sheet" role="dialog" aria-label="Подтверждение прихода" hidden>
+      <button class="x" id="rsvpClose" type="button" aria-label="Закрыть">×</button>
+      <h3>Вы придёте?</h3>
+      <input class="field" id="rName" type="text" autocomplete="name" placeholder="Ваше имя" maxlength="60">
+      <div class="choice">
+        <button class="opt" id="optYes" type="button" aria-pressed="false">Буду</button>
+        <button class="opt" id="optNo" type="button" aria-pressed="false">Не смогу</button>
+      </div>
+      <div class="step" id="rCount" hidden>
+        <span>Сколько человек</span>
+        <div><button id="minus" type="button" aria-label="Меньше">−</button><output id="num">1</output><button id="plus" type="button" aria-label="Больше">+</button></div>
+      </div>
+      <a class="go off" id="rSend" href="#" target="_blank" rel="noopener" aria-disabled="true">Отправить в WhatsApp</a>
+      <p class="hint" id="rHint">Откроется WhatsApp с готовым сообщением, останется нажать «Отправить».</p>
+    </div>
+    <div class="sheet" id="info" role="dialog" aria-label="Детали праздника" hidden>
+      <button class="x" id="infoClose" type="button" aria-label="Закрыть">×</button>
+      <h3>Как нас найти</h3>
+      <div class="facts">
+        <div class="fact">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M8 3v4M16 3v4M3.5 10h17"/></svg>
+          <div><b>28 ноября 2026, суббота</b><span>Начало в 14:30</span></div>
+        </div>
+        <div class="fact">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="10" r="2.6"/></svg>
+          <div><b>House of Light</b><span id="addr">Liepājas iela 56, Rīga</span></div>
+          <button class="copy" id="copyAddr" type="button">Копировать</button>
+        </div>
+      </div>
+      <div class="acts">
+        <a class="act" id="gmaps" href="#" target="_blank" rel="noopener">Google Карты</a>
+        <a class="act" id="amaps" href="#" target="_blank" rel="noopener" hidden>Apple Карты</a>
+        <a class="act wide" id="album" href="#" target="_blank" rel="noopener" hidden>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="3"/><circle cx="9" cy="10" r="1.6"/><path d="M4 17l5-4.5 4 3 3-2.5 4 3.5"/></svg>
+          Фото с праздника
+        </a>
+      </div>
+    </div>
+    <div class="thanks" id="thanks" role="status" aria-live="polite">
+      <canvas id="confetti" aria-hidden="true"></canvas>
+      <div class="thanks-in"><h2 id="thTitle"></h2><p id="thText"></p></div>
+      <small>Нажмите, чтобы закрыть</small>
+    </div>
+    <div class="corner" id="corner">
+      <button class="chip round" id="again" type="button" aria-label="Смотреть ещё раз" title="Смотреть ещё раз">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
+      </button>
+      <button class="chip glow" id="rsvpOpen" type="button" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+        Подтвердить
+      </button>
+      <button class="chip" id="infoOpen" type="button" aria-label="Детали: дата, адрес, маршрут">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.8v.2"/></svg>
+        Детали
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var v = document.getElementById('v'), play = document.getElementById('play'), corner = document.getElementById('corner');
+  /* Address as published on houseoflight.lv */
+  var Q = 'House of Light, Liepājas iela 56, Rīga';
+  /* Google Maps route: opens the Maps app on a phone, the website otherwise */
+  document.getElementById('gmaps').href = 'https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent(Q);
+  /* On phones the links open in the same tab: in-app browsers and some Android browsers swallow target=_blank (the page just flashes and comes back) */
+  var UA = navigator.userAgent;
+  if (/Android|iPhone|iPad|iPod/i.test(UA) || (/Macintosh/.test(UA) && navigator.maxTouchPoints > 1)) {
+    ['rSend', 'gmaps', 'amaps', 'album'].forEach(function (id) { var a = document.getElementById(id); if (a) a.removeAttribute('target'); });
+  }
+  /* WebView of another app (Android "; wv)", iOS without "Safari/"): tell the guest what to do if WhatsApp or Maps will not open */
+  var inApp = /; wv\)/.test(UA) || (/iPhone|iPad|iPod/.test(UA) && !/Safari\//.test(UA));
+  /* RSVP: answers go to the host's WhatsApp as a ready message (digits only, with country code) */
+  var PHONE = '37125999483';
+  var enc = encodeURIComponent;
+  var ro = document.getElementById('rsvpOpen'), sheet = document.getElementById('sheet'), sendA = document.getElementById('rSend');
+  var nameI = document.getElementById('rName'), cntRow = document.getElementById('rCount'), numO = document.getElementById('num'), hint = document.getElementById('rHint');
+  var yes = document.getElementById('optYes'), no = document.getElementById('optNo'), answer = null, n = 1;
+  if (PHONE) ro.hidden = false;
+  /* after the answer is sent, "Подтвердить" stops glowing and "Детали" starts (only when the guest is coming); remembered on this device */
+  var infoB = document.getElementById('infoOpen'), KEY = 'veronika-v2-rsvp';
+  var answeredKind = null;
+  function applyAnswered(kind) { answeredKind = kind; ro.classList.remove('glow'); if (kind === 'yes') infoB.classList.add('glow'); }
+  function resumeGlow() { if (!answeredKind) ro.classList.add('glow'); }   /* the form was closed without an answer: keep nudging */
+  try {
+    if (/[?&]reset\b/.test(location.search)) localStorage.removeItem(KEY);
+    var prevAnswer = localStorage.getItem(KEY); if (prevAnswer) applyAnswered(prevAnswer);
+  } catch (e) {}
+
+  /* details sheet */
+  var info = document.getElementById('info'), amaps = document.getElementById('amaps'), gm = document.getElementById('gmaps');
+  var ALBUM = ''; /* link to the shared photo album: paste it here and the button appears after the party */
+  var ALBUM_FROM = new Date('2026-11-28T18:00:00+02:00');
+  if (/iPhone|iPad|iPod|Macintosh/.test(navigator.userAgent)) {
+    amaps.hidden = false; amaps.href = 'https://maps.apple.com/?daddr=' + enc(Q);
+  } else { gm.classList.add('wide'); }
+  if (ALBUM && new Date() >= ALBUM_FROM) { var al = document.getElementById('album'); al.href = ALBUM; al.hidden = false; }
+  document.getElementById('infoOpen').addEventListener('click', function () { sheet.hidden = true; info.hidden = false; resumeGlow(); });
+  document.getElementById('infoClose').addEventListener('click', function () { info.hidden = true; });
+  var copyB = document.getElementById('copyAddr');
+  copyB.addEventListener('click', function () {
+    var text = 'House of Light, Liepājas iela 56, Rīga';
+    function done() { copyB.textContent = 'Скопировано'; setTimeout(function () { copyB.textContent = 'Копировать'; }, 1800); }
+    function pick() {
+      var r = document.createRange(); r.selectNodeContents(document.getElementById('addr'));
+      var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+      copyB.textContent = 'Выделено';
+    }
+    try { navigator.clipboard.writeText(text).then(done, pick); } catch (e) { pick(); }
+  });
+  function msg() {
+    var nm = nameI.value.trim().replace(/[*_~`]/g, '');
+    /* emoji arrive as "?" in WhatsApp's prefilled text: only the star, the bullet and the line are used */
+    var line = '━━━━━━━━━━━━━━━';
+    var head = '★ *Вероника · 1 годик*\n' + line + '\n';
+    if (answer === 'yes') {
+      return head + '• *' + nm + '*\n• с радостью придём!\n• Гостей: *' + n + '*\n' + line
+        + '\n• 28 ноября 2026, 14:30\n• House of Light, Liepājas iela 56\n\n_Спасибо за приглашение!_';
+    }
+    return head + '• *' + nm + '*\n• к сожалению, не сможем прийти\n' + line
+      + '\n_Спасибо за приглашение, поздравляем Веронику!_';
+  }
+  function refresh() {
+    var ok = !!(nameI.value.trim() && answer);
+    sendA.classList.toggle('off', !ok); sendA.setAttribute('aria-disabled', ok ? 'false' : 'true');
+    sendA.href = ok ? 'https://wa.me/' + PHONE + '?text=' + enc(msg()) : '#';
+    cntRow.hidden = answer !== 'yes'; numO.textContent = n;
+    yes.setAttribute('aria-pressed', String(answer === 'yes')); no.setAttribute('aria-pressed', String(answer === 'no'));
+  }
+  function openSheet() {
+    info.hidden = true; sheet.hidden = false; ro.classList.remove('glow');   /* opened: stop glowing */
+    hint.textContent = inApp ? 'Приглашение открыто внутри другого приложения. Если WhatsApp не откроется, откройте ссылку в Chrome или Safari.'
+      : 'Откроется WhatsApp с готовым сообщением, останется нажать «Отправить».';
+  }
+  ro.addEventListener('click', openSheet);
+  document.getElementById('rsvpClose').addEventListener('click', function () { sheet.hidden = true; resumeGlow(); });
+  yes.addEventListener('click', function () { answer = 'yes'; refresh(); });
+  no.addEventListener('click', function () { answer = 'no'; refresh(); });
+  document.getElementById('minus').addEventListener('click', function () { n = Math.max(1, n - 1); refresh(); });
+  document.getElementById('plus').addEventListener('click', function () { n = Math.min(10, n + 1); refresh(); });
+  nameI.addEventListener('input', refresh);
+  function onSend(e) {
+    if (e.currentTarget.getAttribute('aria-disabled') === 'true') { e.preventDefault(); hint.textContent = nameI.value.trim() ? 'Выберите «Буду» или «Не смогу».' : 'Напишите, пожалуйста, ваше имя.'; return; }
+    hint.textContent = 'Открываю WhatsApp…';
+    thanksPending(answer);
+  }
+  sendA.addEventListener('click', onSend);
+
+  /* thank-you screen: shown only when the guest really went to WhatsApp and came back (page in the background for 3 s or more).
+     If WhatsApp did not open, or only flashed, nothing is shown and the answer is not saved: the form simply stays, and the guest can tap again. */
+  var thanks = document.getElementById('thanks'), cv = document.getElementById('confetti'), pend = null, timer = 0, raf = 0;
+  var hiddenAt = 0, AWAY_MIN = 3000;   /* the guest must stay away at least 3 s for the answer to count as sent */
+  var still = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function thanksPending(kind) {
+    pend = kind; hiddenAt = 0; clearTimeout(timer);
+    timer = setTimeout(notSent, 2200);
+  }
+  function notSent() {
+    if (!pend) return;
+    pend = null; hiddenAt = 0; clearTimeout(timer);
+    hint.textContent = 'Откроется WhatsApp с готовым сообщением, останется нажать «Отправить».';
+  }
+  function showThanks(kind) {
+    pend = null; clearTimeout(timer);
+    applyAnswered(kind);
+    try { localStorage.setItem(KEY, kind); } catch (e) {}
+    sheet.hidden = true; info.hidden = true;
+    document.getElementById('thTitle').textContent = kind === 'yes' ? 'До скорых встреч!' : 'Спасибо за ответ!';
+    document.getElementById('thText').textContent = kind === 'yes' ? '28 ноября в 14:30' : 'Жаль, что не получится.\nБудем думать о вас';
+    document.getElementById('thText').style.whiteSpace = 'pre-line';
+    clearCv(); thanks.dataset.kind = kind; thanks.classList.add('on');
+    if (kind === 'yes' && !still) confetti();
+  }
+  function clearCv() { cancelAnimationFrame(raf); var c = cv.getContext('2d'); c.setTransform(1, 0, 0, 1, 0, 0); c.clearRect(0, 0, cv.width, cv.height); }
+  thanks.addEventListener('click', function () { thanks.classList.remove('on'); clearCv(); });
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) { if (pend) { clearTimeout(timer); if (!hiddenAt) hiddenAt = Date.now(); } return; }
+    if (pend) {
+      /* WhatsApp that only flashes and closes brings the guest back within a second or two: that is not a sent answer */
+      var away = hiddenAt ? Date.now() - hiddenAt : AWAY_MIN; hiddenAt = 0;
+      if (away < AWAY_MIN) { notSent(); return; }
+      setTimeout(function () { if (pend) showThanks(pend); }, 350);
+    }
+    else if (thanks.classList.contains('on') && !still && thanks.dataset.kind !== 'no') setTimeout(confetti, 350);
+  });
+  function confetti() {
+    cancelAnimationFrame(raf);
+    var dpr = Math.min(window.devicePixelRatio || 1, 2), w = cv.clientWidth, h = cv.clientHeight;
+    cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr);
+    var g = cv.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    var COL = ['#ffe29a', '#e6c27a', '#f4e8cc', '#ffffff', '#e0a852', '#9fd8cb'], P = [], R = Math.random;
+    function add(x, y, vx, vy, delay) {
+      P.push({ x: x, y: y, vx: vx, vy: vy, d: delay || 0, c: COL[(R() * COL.length) | 0], w: 6 + R() * 6, h: 9 + R() * 8, a: R() * 6.28, va: (R() - .5) * 9,
+        t: R() * 6.28, vt: 4 + R() * 6, round: R() < .22 });
+    }
+    var k = Math.min(w, 460) / 400;
+    for (var i = 0; i < 70; i++) { /* two bursts from the bottom corners */
+      var s = (620 + R() * 760) * k, a = -(Math.PI / 2) + (R() - .5) * 0.95;
+      add(-6, h * .86, Math.abs(Math.cos(a)) * s * .9 + 60, Math.sin(a) * s - 120, R() * .25);
+      add(w + 6, h * .86, -(Math.abs(Math.cos(a)) * s * .9 + 60), Math.sin(a) * s - 120, R() * .25);
+    }
+    for (var j = 0; j < 70; j++) add(R() * w, -20 - R() * h * .35, (R() - .5) * 90, 90 + R() * 150, .5 + R() * 1.6); /* gentle rain */
+    var t0 = performance.now(), last = t0;
+    (function step(now) {
+      var dt = Math.min((now - last) / 1000, .05), el = (now - t0) / 1000; last = now;
+      g.clearRect(0, 0, w, h); var live = 0;
+      for (var n2 = 0; n2 < P.length; n2++) {
+        var p = P[n2]; if (el < p.d) { live++; continue; }
+        p.vy += 760 * dt; var drag = Math.pow(.18, dt); p.vx *= drag; if (p.vy < 0) p.vy *= drag; else p.vy = Math.min(p.vy, 260 + p.w * 6);
+        p.x += (p.vx + Math.sin(p.t) * 28) * dt; p.y += p.vy * dt; p.a += p.va * dt; p.t += p.vt * dt;
+        if (p.y > h + 30) continue; live++;
+        var flip = Math.cos(p.t); g.save(); g.translate(p.x, p.y); g.rotate(p.a); g.scale(1, flip); g.fillStyle = p.c;
+        g.globalAlpha = Math.min(1, (h + 30 - p.y) / 120 + .3);
+        if (p.round) { g.beginPath(); g.arc(0, 0, p.w / 2.2, 0, 6.28); g.fill(); } else g.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+        g.restore();
+      }
+      if (live && el < 9) raf = requestAnimationFrame(step); else g.clearRect(0, 0, w, h);
+    })(t0);
+  }
+  var REVEAL = 15.2; /* seconds: the address is on screen from here */
+  function reveal() { corner.classList.add('show'); }
+  /* full screen without the address bar (Android and desktop; iPhone Safari does not allow it for pages) */
+  var fsBtn = document.getElementById('fs'), started = false;
+  function canFull() { var el = document.documentElement; return !!(el.requestFullscreen || el.webkitRequestFullscreen); }
+  function isFull() { return !!(document.fullscreenElement || document.webkitFullscreenElement); }
+  function goFull() {
+    var el = document.documentElement, rq = el.requestFullscreen || el.webkitRequestFullscreen;
+    if (!rq || isFull()) return;
+    try { var r = rq.call(el, { navigationUI: 'hide' }); if (r && r.catch) r.catch(function () {}); } catch (e) {}
+  }
+  var ICON_IN = 'M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5', ICON_OUT = 'M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5';
+  function exitFull() {
+    try { var r = (document.exitFullscreen || document.webkitExitFullscreen).call(document); if (r && r.catch) r.catch(function () {}); } catch (e) {}
+  }
+  function syncFs() {
+    fsBtn.hidden = !(started && canFull());
+    var full = isFull();
+    document.getElementById('fsIcon').setAttribute('d', full ? ICON_OUT : ICON_IN);
+    var t = full ? 'Выйти из полного экрана' : 'На весь экран';
+    fsBtn.setAttribute('aria-label', t); fsBtn.title = t;
+  }
+  document.addEventListener('fullscreenchange', syncFs);
+  document.addEventListener('webkitfullscreenchange', syncFs);
+  fsBtn.addEventListener('click', function () { if (isFull()) exitFull(); else goFull(); setTimeout(syncFs, 400); });
+  function start() {
+    goFull(); started = true; setTimeout(syncFs, 700);
+    play.classList.add('gone');
+    var p = v.play(); if (p && p.catch) p.catch(function () { play.classList.remove('gone'); });
+  }
+  play.addEventListener('click', start);
+  v.addEventListener('click', function () {
+    if (v.ended) { restart(); return; }
+    if (v.paused) start(); else v.pause();
+  });
+  v.addEventListener('timeupdate', function () { if (v.currentTime >= REVEAL) reveal(); });
+  v.addEventListener('ended', function () { reveal(); corner.classList.add('ended'); });
+  v.addEventListener('error', function () { reveal(); });
+  function restart() { corner.classList.remove('ended'); v.currentTime = 0; start(); }
+
+  /* A falling star hits the lamp of the lighthouse, flashes, and then the lighthouse turns into the cake
+     (that change is in the video itself, from about 7.1 s). The star is drawn on a canvas over the video
+     and is a pure function of the video's current time, so seeking, pausing and replaying stay in sync. */
+  (function () {
+    var sc = document.getElementById('star'); if (!sc || still) return;
+    var g = sc.getContext('2d'), raf = 0, W = 0, H = 0;
+    var T0 = 5.6, T1 = 6.75, TEND = 8.05;   /* video seconds: the star appears, hits the lamp, the effect ends */
+    var LX = .5, LY = .147;                   /* centre of the lamp as a fraction of the video frame */
+    function rect() { /* where the 9:16 frame sits inside the stage (object-fit: contain) */
+      var sw = sc.clientWidth, sh = sc.clientHeight, w = sw, h = sw * 16 / 9;
+      if (h > sh) { h = sh; w = sh * 9 / 16; }
+      return { x: (sw - w) / 2, y: (sh - h) / 2, w: w, h: h };
+    }
+    function fit() {
+      var d = Math.min(window.devicePixelRatio || 1, 2); W = sc.clientWidth; H = sc.clientHeight;
+      var cw = Math.round(W * d), ch = Math.round(H * d);
+      if (sc.width !== cw || sc.height !== ch) { sc.width = cw; sc.height = ch; }
+      g.setTransform(d, 0, 0, d, 0, 0);
+    }
+    function hash(n) { var x = Math.sin(n * 127.1) * 43758.5453; return x - Math.floor(x); }
+    function bez(p, a, b, c, d) { var q = 1 - p; return q * q * q * a + 3 * q * q * p * b + 3 * q * p * p * c + p * p * p * d; }
+    function pos(p, r) { return { x: r.x + r.w * bez(p, .95, .88, .64, LX), y: r.y + r.h * bez(p, -.12, -.02, .07, LY) }; }
+    function out(x) { return 1 - Math.pow(1 - Math.min(1, Math.max(0, x)), 3); }
+    function dot(x, y, r, a, c) { g.fillStyle = 'rgba(' + c + ',' + a.toFixed(3) + ')'; g.beginPath(); g.arc(x, y, r, 0, 6.2832); g.fill(); }
+    function glow(x, y, r, a) {
+      var gr = g.createRadialGradient(x, y, 0, x, y, r);
+      gr.addColorStop(0, 'rgba(255,250,232,' + a.toFixed(3) + ')'); gr.addColorStop(.35, 'rgba(255,214,140,' + (a * .55).toFixed(3) + ')'); gr.addColorStop(1, 'rgba(255,190,90,0)');
+      g.fillStyle = gr; g.beginPath(); g.arc(x, y, r, 0, 6.2832); g.fill();
+    }
+    function spark(x, y, r, t, a) { /* four-point star */
+      g.save(); g.translate(x, y); g.rotate(t * 1.8); g.fillStyle = 'rgba(255,246,214,' + a.toFixed(3) + ')'; g.beginPath();
+      for (var i = 0; i < 8; i++) { var an = i * Math.PI / 4, rr = i % 2 ? r * .2 : r; g.lineTo(Math.cos(an) * rr, Math.sin(an) * rr); }
+      g.closePath(); g.fill(); g.restore();
+    }
+    function draw(t) {
+      g.clearRect(0, 0, W, H);
+      if (t < T0 || t > TEND) return;
+      var r = rect(), s = r.w / 720, lx = r.x + r.w * LX, ly = r.y + r.h * LY, i;
+      g.globalCompositeOperation = 'lighter';
+      if (t < T1) {
+        var p = (t - T0) / (T1 - T0), pe = Math.pow(p, 1.3), head = pos(pe, r), fade = Math.min(1, p * 6);
+        for (i = 46; i >= 1; i--) { /* the trail: older points are smaller, dimmer and scattered a little */
+          var k = i / 46, c = pos(Math.max(0, pe - k * .5 * Math.min(1, p * 2.2)), r), a = (1 - k) * (1 - k) * fade;
+          dot(c.x + (hash(i) - .5) * 6 * s * k, c.y + (hash(i + 9) - .5) * 6 * s * k, ((1 - k) * 8 + .8) * s, a, '255,214,140');
+        }
+        glow(head.x, head.y, 52 * s * (.7 + p * .6), .7 * fade);
+        spark(head.x, head.y, 28 * s * (.8 + p * .5), t, fade);
+      } else {
+        var u = t - T1;
+        if (u < .14) spark(lx, ly, 28 * s * (1 - u / .14), t, 1);
+        glow(lx, ly, 70 * s, Math.max(0, 1.3 - u * 2.6));                          /* the lamp itself flares */
+        glow(lx, ly, (60 + 300 * out(u / .6)) * s, Math.min(1, Math.exp(-u * 2.6) * 1.2));               /* flash */
+        var half = (50 + 360 * out(u / .5)) * s, sh = 5 * s * Math.exp(-u * 2.4);   /* horizontal streak, like the lighthouse beam */
+        var lg = g.createLinearGradient(lx - half, 0, lx + half, 0);
+        lg.addColorStop(0, 'rgba(255,214,140,0)'); lg.addColorStop(.5, 'rgba(255,248,225,' + Math.exp(-u * 2.2).toFixed(3) + ')'); lg.addColorStop(1, 'rgba(255,214,140,0)');
+        g.fillStyle = lg; g.fillRect(lx - half, ly - sh, half * 2, sh * 2);
+        if (u < 1) {                                                                /* shock ring */
+          g.strokeStyle = 'rgba(255,226,160,' + (Math.pow(1 - u, 2) * .95).toFixed(3) + ')'; g.lineWidth = 4.5 * s * (1 - u) + .6;
+          g.beginPath(); g.arc(lx, ly, (20 + 330 * out(u / .9)) * s, 0, 6.2832); g.stroke();
+        }
+        for (i = 0; i < 48; i++) {                                                  /* sparks thrown out of the lamp */
+          var an = hash(i) * 6.2832, sp = (130 + 260 * hash(i + 3)) * s, life = .7 + .6 * hash(i + 5), al = 1 - u / life;
+          if (al <= 0) continue;
+          var d = (1 - Math.exp(-u * 3)) / 3;
+          var sx = lx + Math.cos(an) * sp * d, sy = ly + Math.sin(an) * sp * d + 90 * s * u * u, sr = (2 + 2.8 * hash(i + 7)) * s;
+          dot(sx, sy, sr * 3, al * .18, '255,214,140'); dot(sx, sy, sr, al, i % 3 ? '255,226,160' : '255,250,232');
+        }
+      }
+      g.globalCompositeOperation = 'source-over';
+    }
+
+    /* ---- sound for the star, synthesised with WebAudio (nothing to download). The soundtrack is in D, so the notes
+       are D major. SOUND is one of: bell, whoosh, harp, box, glow, cine, off ---- */
+    var SOUND = 'off';
+    var ac = null, chain = null, prev = -1;
+    var N = { D3: 146.83, A3: 220, D4: 293.66, F4: 369.99, A4: 440, D5: 587.33, F5: 739.99, A5: 880, B5: 987.77, D6: 1174.66, F6: 1479.98, A6: 1760, B6: 1975.53, D7: 2349.32, F7: 2959.96, A7: 3520 };
+    function makeChain(c) {   /* bus -> dry + a short, soft room -> gentle limiter -> out */
+      var bus = c.createGain(), dry = c.createGain(), wet = c.createGain(), conv = c.createConvolver(), lim = c.createDynamicsCompressor(), master = c.createGain();
+      var len = Math.round(c.sampleRate * 1.5), ir = c.createBuffer(2, len, c.sampleRate), ch, i, d;
+      for (ch = 0; ch < 2; ch++) { d = ir.getChannelData(ch); for (i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3.2); }
+      conv.buffer = ir; dry.gain.value = .85; wet.gain.value = .32; master.gain.value = .65;
+      lim.threshold.value = -10; lim.knee.value = 8; lim.ratio.value = 6; lim.attack.value = .003; lim.release.value = .2;
+      bus.connect(dry); bus.connect(conv); conv.connect(wet); dry.connect(lim); wet.connect(lim); lim.connect(master); master.connect(c.destination);
+      return { bus: bus };
+    }
+    function env(c, out, at, vol, att, len) {   /* silence -> vol over att seconds -> dies away by len */
+      var a = c.createGain(); a.gain.setValueAtTime(.0001, at); a.gain.linearRampToValueAtTime(vol, at + att); a.gain.exponentialRampToValueAtTime(.0001, at + len); a.connect(out); return a;
+    }
+    function tone(c, out, type, f, at, vol, att, len) {
+      if (f > 9000) return; var o = c.createOscillator(); o.type = type; o.frequency.value = f; o.connect(env(c, out, at, vol, att, len)); o.start(at); o.stop(at + len + .05);
+    }
+    function noise(c, secs) { var n = Math.round(c.sampleRate * secs), b = c.createBuffer(1, n, c.sampleRate), d = b.getChannelData(0), i; for (i = 0; i < n; i++) d[i] = Math.random() * 2 - 1; var s = c.createBufferSource(); s.buffer = b; return s; }
+    /* the voices; each takes (context, output, frequency, start, loudness, length, attack) */
+    var VOICE = {
+      bell: function (c, out, f, at, vol, len) {   /* a struck bell: a few inharmonic partials, the higher ones die sooner */
+        [[1, 1, 1], [2.01, .32, .55], [3.0, .16, .38], [4.17, .07, .25]].forEach(function (p) { tone(c, out, 'sine', f * p[0], at, vol * p[1], .004, len * p[2]); });
+      },
+      box: function (c, out, f, at, vol, len) {    /* a music box: a clean tone with a short metallic click on top */
+        tone(c, out, 'sine', f, at, vol, .002, len); tone(c, out, 'sine', f * 3, at, vol * .25, .002, len * .25); tone(c, out, 'sine', f * 5.4, at, vol * .1, .002, len * .12);
+      },
+      pluck: function (c, out, f, at, vol, len) {  /* a harp string: bright at first, then mellow */
+        var lp = c.createBiquadFilter(), a = env(c, out, at, vol, .003, len), g2 = c.createGain(), o = c.createOscillator(), o2 = c.createOscillator();
+        lp.type = 'lowpass'; lp.frequency.setValueAtTime(Math.min(f * 6, 9000), at); lp.frequency.exponentialRampToValueAtTime(f * 1.5, at + len * .6);
+        o.type = 'triangle'; o.frequency.value = f; o2.type = 'sine'; o2.frequency.value = f * 2; g2.gain.value = .35;
+        o.connect(lp); o2.connect(g2); g2.connect(lp); lp.connect(a); o.start(at); o2.start(at); o.stop(at + len + .05); o2.stop(at + len + .05);
+      },
+      pad: function (c, out, f, at, vol, len, att) {   /* a warm held note: two slightly detuned voices through a soft filter */
+        var lp = c.createBiquadFilter(), a = env(c, out, at, vol, att || .3, len);
+        lp.type = 'lowpass'; lp.frequency.value = 1700; lp.connect(a);
+        [[f, 'sine'], [f * 1.004, 'sine'], [f * .5, 'triangle']].forEach(function (p, i) {
+          var o = c.createOscillator(), g = c.createGain(); o.type = p[1]; o.frequency.value = p[0]; g.gain.value = i === 2 ? .35 : 1; o.connect(g); g.connect(lp); o.start(at); o.stop(at + len + .05);
+        });
+      },
+      boom: function (c, out, f, at, vol, len) {   /* a soft low thump; a second tone higher up so phone speakers still carry it */
+        [[120, 42, 1], [240, 90, .45]].forEach(function (p) {
+          var o = c.createOscillator(); o.type = 'sine'; o.frequency.setValueAtTime(p[0], at); o.frequency.exponentialRampToValueAtTime(p[1], at + .4);
+          o.connect(env(c, out, at, vol * p[2], .006, len)); o.start(at); o.stop(at + len + .05);
+        });
+      },
+      sweep: function (c, out, f, at, vol, len) {  /* a quiet rising whoosh of filtered noise */
+        var src = noise(c, len + .1), fl = c.createBiquadFilter(), a = c.createGain();
+        fl.type = 'bandpass'; fl.Q.value = 1.1; fl.frequency.setValueAtTime(500, at); fl.frequency.exponentialRampToValueAtTime(6000, at + len);
+        a.gain.setValueAtTime(.0001, at); a.gain.linearRampToValueAtTime(.05, at + len * .1); a.gain.linearRampToValueAtTime(.17, at + len * .85); a.gain.linearRampToValueAtTime(.0001, at + len);
+        src.connect(fl); fl.connect(a); a.connect(out); src.start(at); src.stop(at + len + .05);
+      },
+      air: function (c, out, f, at, vol, len) {    /* a reverse-cymbal swell: air that builds and stops at the hit */
+        var src = noise(c, len + .1), fl = c.createBiquadFilter(), a = env(c, out, at, vol, len * .94, len);
+        fl.type = 'bandpass'; fl.Q.value = .7; fl.frequency.setValueAtTime(1800, at); fl.frequency.exponentialRampToValueAtTime(8000, at + len);
+        src.connect(fl); fl.connect(a); src.start(at); src.stop(at + len + .05);
+      }
+    };
+    var FLY = T1 - T0;
+    var PLAN = {   /* per kind and per cue: [seconds after the cue, note, loudness, length, voice (default bell), attack] */
+      bell: {
+        fly: [[.12, 'A6', .05, 1.1], [.40, 'B6', .055, 1.1], [.66, 'D7', .06, 1.1], [.86, 'F7', .06, 1.0], [1.0, 'A7', .07, 1.0]],
+        hit: [[0, 'D6', .20, 2.6], [0, 'A6', .12, 2.2], [.01, 'D7', .09, 1.8], [.07, 'F7', .06, 1.2], [.15, 'A7', .05, 1.1], [.24, 'D7', .05, 1.2], [.34, 'F7', .035, 1.0], [.46, 'A6', .03, 1.2]]
+      },
+      whoosh: {
+        fly: [[0, 'D6', 0, FLY, 'sweep']],
+        hit: [[0, 'D7', .15, 1.4], [0, 'A7', .08, 1.0], [.08, 'F7', .05, 1.1], [.18, 'A7', .045, 1.0], [.30, 'D7', .035, 1.1]]
+      },
+      harp: {   /* a rising run of the strings, then a full strum */
+        fly: [[.05, 'D5', .06, 1.2, 'pluck'], [.20, 'F5', .06, 1.2, 'pluck'], [.34, 'A5', .06, 1.2, 'pluck'], [.47, 'B5', .06, 1.2, 'pluck'], [.58, 'D6', .06, 1.2, 'pluck'], [.69, 'F6', .06, 1.2, 'pluck'], [.79, 'A6', .06, 1.1, 'pluck'], [.88, 'B6', .06, 1.1, 'pluck'], [.96, 'D7', .06, 1.1, 'pluck'], [1.04, 'F7', .055, 1.0, 'pluck']],
+        hit: [[0, 'D5', .17, 2.8, 'pluck'], [.035, 'A5', .13, 2.6, 'pluck'], [.07, 'F6', .12, 2.4, 'pluck'], [.105, 'D6', .12, 2.4, 'pluck'], [.14, 'A6', .10, 2.2, 'pluck'], [.18, 'D7', .08, 2.0, 'pluck'], [.22, 'F7', .06, 1.8, 'pluck']]
+      },
+      box: {    /* a music box: a few notes falling with the star, then a gentle shower */
+        fly: [[.15, 'D7', .05, .9, 'box'], [.42, 'B6', .05, .9, 'box'], [.68, 'A6', .05, .9, 'box'], [.90, 'F6', .055, .9, 'box']],
+        hit: [[0, 'D6', .15, 2.2, 'box'], [0, 'D7', .09, 1.8, 'box'], [.12, 'A6', .08, 1.6, 'box'], [.24, 'F7', .065, 1.5, 'box'], [.36, 'A7', .05, 1.4, 'box'], [.50, 'D7', .04, 1.4, 'box'], [.64, 'A6', .03, 1.4, 'box']]
+      },
+      glow: {   /* no sharp sounds at all: a warm chord grows under the music and opens at the hit */
+        fly: [[0, 'D3', .11, FLY, 'pad', FLY * .92], [0, 'A3', .08, FLY, 'pad', FLY * .92], [0, 'D4', .06, FLY, 'pad', FLY * .92]],
+        hit: [[0, 'D4', .13, 3.4, 'pad', .35], [0, 'F4', .10, 3.4, 'pad', .35], [0, 'A4', .10, 3.4, 'pad', .35], [0, 'D5', .08, 3.2, 'pad', .35], [.05, 'D6', .045, 2.2], [.22, 'A6', .03, 1.8]]
+      },
+      cine: {   /* a swell, a soft thump, a single bell on top */
+        fly: [[0, 'D6', .10, FLY, 'air'], [0, 'D3', .07, FLY, 'pad', FLY * .95]],
+        hit: [[0, 'D3', .45, 1.3, 'boom'], [0, 'D4', .10, 2.6, 'pad', .2], [0, 'D6', .11, 2.4], [0, 'A6', .06, 2.0], [.1, 'D7', .04, 1.5]]
+      }
+    };
+    var TRIM = { harp: { hit: .8 }, box: { fly: 1.4, hit: 1.5 }, glow: { fly: .6, hit: .85 }, cine: { hit: .55 } };   /* evens out the loudness of the variants */
+    function play(c, bus, kind, which, at, late) {
+      var trim = (TRIM[kind] && TRIM[kind][which]) || 1;   /* at = the moment the video reaches the cue; late = how far past it we already are */
+      ((PLAN[kind] || PLAN.bell)[which]).forEach(function (e) {
+        if (e[0] < late - .15) return;
+        VOICE[e[4] || 'bell'](c, bus, N[e[1]], at + Math.max(0, e[0] - late), e[2] * trim, e[3] - Math.max(0, late - e[0]) * (e[4] === 'sweep' || e[4] === 'air' || e[4] === 'pad' ? 1 : 0), e[5]);
+      });
+    }
+    function ensureAudio() {
+      if (SOUND === 'off' || v.muted) return;
+      var AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
+      try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e) {}   /* iPhone: sound even with the silent switch on */
+      try { if (!ac) { ac = new AC(); chain = makeChain(ac); } if (ac.state === 'suspended') ac.resume(); } catch (e) { ac = null; }
+    }
+    function fire(which, late) {
+      if (!ac || ac.state !== 'running') return;
+      var t = ac.currentTime; chain.bus.gain.cancelScheduledValues(t); chain.bus.gain.setValueAtTime(1, t);
+      play(ac, chain.bus, SOUND, which, t + .01, late);
+    }
+    function hush() { if (!ac || !chain) return; var t = ac.currentTime; chain.bus.gain.cancelScheduledValues(t); chain.bus.gain.setTargetAtTime(0, t, .04); }
+    function sfx(cur) {   /* called every frame while the video plays: did the video just pass a cue? */
+      if (SOUND !== 'off' && !v.muted && !v.paused && prev >= 0 && cur > prev && cur - prev < .35) {
+        if (prev < T0 && cur >= T0) fire('fly', cur - T0);
+        if (prev < T1 && cur >= T1) fire('hit', cur - T1);
+      }
+      prev = cur;
+    }
+    ['click', 'touchend', 'keydown'].forEach(function (e) { document.addEventListener(e, ensureAudio, true); });
+    ['seeking', 'pause', 'ended'].forEach(function (e) { v.addEventListener(e, function () { hush(); if (e === 'seeking') prev = -1; }); });
+    /*__PREVIEW__*/
+    function tick() { raf = 0; fit(); var cur = v.currentTime; draw(cur); sfx(cur); if (!v.paused && !v.ended) raf = requestAnimationFrame(tick); }
+    function kick() { if (!raf) raf = requestAnimationFrame(tick); }
+    ['play', 'playing', 'seeked', 'pause', 'timeupdate'].forEach(function (e) { v.addEventListener(e, kick); });
+    window.addEventListener('resize', kick);
+    v.addEventListener('ended', function () { g.clearRect(0, 0, W, H); });
+  })();
+  document.getElementById('again').addEventListener('click', restart);
+})();
+</script>
+</body>
+</html>
