@@ -138,12 +138,6 @@ video { display: block; width: 100%; height: 100%; object-fit: contain; backgrou
 .go { display: flex; align-items: center; justify-content: center; height: 54px; border-radius: 999px; text-decoration: none; font: 700 17px/1 var(--body); color: #0c2c2a; background: linear-gradient(100deg, var(--gold-hi), #e0a852); box-shadow: 0 8px 26px rgba(230,170,70,.3); transition: opacity .2s; }
 .go.off { opacity: .4; box-shadow: none; }
 .hint { margin: 10px 0 0; min-height: 1.2em; text-align: center; font-size: 13px; color: var(--cream); opacity: .85; }
-/* shown only when WhatsApp did not open after the guest tapped send */
-.fail { margin: 12px 0 0; padding: 12px; border-radius: 16px; border: 1px solid var(--line); background: rgba(255,255,255,.05); text-align: center; font-size: 13px; line-height: 1.4; color: var(--cream); }
-.fail[hidden] { display: none !important; }
-.fail p { margin: 0 0 10px; }
-.fail p.sub { margin: 10px 0 0; opacity: .75; }
-.fail b { color: var(--gold-hi); white-space: nowrap; }
 .fsbtn { position: absolute; top: 10px; right: 10px; z-index: 4; width: 40px; height: 40px; padding: 0; border-radius: 50%; cursor: pointer;
   display: flex; align-items: center; justify-content: center; color: var(--gold); background: var(--glass); border: 1px solid var(--line);
   -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
@@ -203,15 +197,6 @@ video { display: block; width: 100%; height: 100%; object-fit: contain; backgrou
       </div>
       <a class="go off" id="rSend" href="#" target="_blank" rel="noopener" aria-disabled="true">Отправить в WhatsApp</a>
       <p class="hint" id="rHint">Откроется WhatsApp с готовым сообщением, останется нажать «Отправить».</p>
-      <div class="fail" id="rFail" hidden>
-        <p>WhatsApp не открылся или сразу закрылся. Скопируйте ответ и вставьте его в чат с <b id="rPhone"></b>.</p>
-        <div class="acts">
-          <button class="act" id="rCopy" type="button">Скопировать ответ</button>
-          <a class="act" id="rApp" href="#">Открыть WhatsApp</a>
-          <button class="act wide" id="rDone" type="button">Я уже отправил(а)</button>
-        </div>
-        <p class="sub">Если приглашение открыто внутри мессенджера, откройте его в Safari или Chrome и попробуйте ещё раз.</p>
-      </div>
     </div>
     <div class="sheet" id="info" role="dialog" aria-label="Детали праздника" hidden>
       <button class="x" id="infoClose" type="button" aria-label="Закрыть">×</button>
@@ -274,7 +259,6 @@ video { display: block; width: 100%; height: 100%; object-fit: contain; backgrou
   /* RSVP: answers go to the host's WhatsApp as a ready message (digits only, with country code) */
   var PHONE = '37125999483';
   var enc = encodeURIComponent;
-  var useIntent = /Android/.test(navigator.userAgent) && !/; wv\)/.test(navigator.userAgent);
   var ro = document.getElementById('rsvpOpen'), sheet = document.getElementById('sheet'), sendA = document.getElementById('rSend');
   var nameI = document.getElementById('rName'), cntRow = document.getElementById('rCount'), numO = document.getElementById('num'), hint = document.getElementById('rHint');
   var yes = document.getElementById('optYes'), no = document.getElementById('optNo'), answer = null, n = 1;
@@ -323,17 +307,12 @@ video { display: block; width: 100%; height: 100%; object-fit: contain; backgrou
   function refresh() {
     var ok = !!(nameI.value.trim() && answer);
     sendA.classList.toggle('off', !ok); sendA.setAttribute('aria-disabled', ok ? 'false' : 'true');
-    var wa = 'https://wa.me/' + PHONE + '?text=' + enc(msg());
-    /* Android (not a WebView): an intent without a package opens whichever of WhatsApp / WhatsApp Business is installed, or lets the guest pick
-       when both are; if neither handles it, Chrome falls back to the normal wa.me link. Everything else uses wa.me. */
-    sendA.href = !ok ? '#' : useIntent ? 'intent://send?phone=' + PHONE + '&text=' + enc(msg()) + '#Intent;scheme=whatsapp;S.browser_fallback_url=' + enc(wa) + ';end' : wa;
+    sendA.href = ok ? 'https://wa.me/' + PHONE + '?text=' + enc(msg()) : '#';
     cntRow.hidden = answer !== 'yes'; numO.textContent = n;
     yes.setAttribute('aria-pressed', String(answer === 'yes')); no.setAttribute('aria-pressed', String(answer === 'no'));
   }
-  var rFail = document.getElementById('rFail'), rApp = document.getElementById('rApp'), rCopy = document.getElementById('rCopy');
-  document.getElementById('rPhone').textContent = '+' + PHONE.replace(/^(\d{3})(\d{2})(\d{3})(\d{3})$/, '$1 $2 $3 $4');
   function openSheet() {
-    info.hidden = true; sheet.hidden = false; rFail.hidden = true;
+    info.hidden = true; sheet.hidden = false;
     hint.textContent = inApp ? 'Приглашение открыто внутри другого приложения. Если WhatsApp не откроется, откройте ссылку в Chrome или Safari.'
       : 'Откроется WhatsApp с готовым сообщением, останется нажать «Отправить».';
   }
@@ -346,46 +325,27 @@ video { display: block; width: 100%; height: 100%; object-fit: contain; backgrou
   nameI.addEventListener('input', refresh);
   function onSend(e) {
     if (e.currentTarget.getAttribute('aria-disabled') === 'true') { e.preventDefault(); hint.textContent = nameI.value.trim() ? 'Выберите «Буду» или «Не смогу».' : 'Напишите, пожалуйста, ваше имя.'; return; }
-    rFail.hidden = true;
     hint.textContent = 'Открываю WhatsApp…';
     thanksPending(answer);
   }
   sendA.addEventListener('click', onSend);
 
-  /* thank-you screen: shown only when the guest comes back from WhatsApp, i.e. the page really went to the background.
-     If the page never left within 2.2 s, WhatsApp did not open: show the manual fallback and do NOT mark the answer as sent. */
+  /* thank-you screen: shown only when the guest really went to WhatsApp and came back (page in the background for 3 s or more).
+     If WhatsApp did not open, or only flashed, nothing is shown and the answer is not saved: the form simply stays, and the guest can tap again. */
   var thanks = document.getElementById('thanks'), cv = document.getElementById('confetti'), pend = null, timer = 0, raf = 0;
   var hiddenAt = 0, AWAY_MIN = 3000;   /* the guest must stay away at least 3 s for the answer to count as sent */
   var still = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
   function thanksPending(kind) {
     pend = kind; hiddenAt = 0; clearTimeout(timer);
-    timer = setTimeout(showFail, 2200);
+    timer = setTimeout(notSent, 2200);
   }
-  function showFail() {
+  function notSent() {
     if (!pend) return;
-    rApp.href = 'whatsapp://send?phone=' + PHONE + '&text=' + enc(msg());
-    sheet.hidden = false; info.hidden = true;
-    hint.textContent = '';
-    rFail.hidden = false;
+    pend = null; hiddenAt = 0; clearTimeout(timer);
+    hint.textContent = 'Откроется WhatsApp с готовым сообщением, останется нажать «Отправить».';
   }
-  rApp.addEventListener('click', function () { thanksPending(answer); });
-  document.getElementById('rDone').addEventListener('click', function () { showThanks(answer); });
-  rCopy.addEventListener('click', function () {
-    var text = msg();
-    function ok() { rCopy.textContent = 'Скопировано'; setTimeout(function () { rCopy.textContent = 'Скопировать ответ'; }, 2200); }
-    function legacy() {
-      var t = document.createElement('textarea'), done = false;
-      t.value = text; t.setAttribute('readonly', ''); t.style.cssText = 'position:fixed;top:0;opacity:0';
-      document.body.appendChild(t); t.select(); t.setSelectionRange(0, t.value.length);
-      try { done = document.execCommand('copy'); } catch (e) {}
-      document.body.removeChild(t);
-      if (done) ok(); else rCopy.textContent = 'Не получилось';
-    }
-    try { navigator.clipboard.writeText(text).then(ok, legacy); } catch (e) { legacy(); }
-  });
   function showThanks(kind) {
     pend = null; clearTimeout(timer);
-    rFail.hidden = true;
     applyAnswered(kind);
     try { localStorage.setItem(KEY, kind); } catch (e) {}
     sheet.hidden = true; info.hidden = true;
@@ -402,7 +362,7 @@ video { display: block; width: 100%; height: 100%; object-fit: contain; backgrou
     if (pend) {
       /* WhatsApp that only flashes and closes brings the guest back within a second or two: that is not a sent answer */
       var away = hiddenAt ? Date.now() - hiddenAt : AWAY_MIN; hiddenAt = 0;
-      if (away < AWAY_MIN) { showFail(); return; }
+      if (away < AWAY_MIN) { notSent(); return; }
       setTimeout(function () { if (pend) showThanks(pend); }, 350);
     }
     else if (thanks.classList.contains('on') && !still && thanks.dataset.kind !== 'no') setTimeout(confetti, 350);
