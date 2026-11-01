@@ -86,15 +86,27 @@ video { display: block; width: 100%; height: 100%; object-fit: contain; backgrou
 .chip.glow svg { color: #0c2c2a; }
 #rsvpOpen::after, #infoOpen::after {
   content: ""; position: absolute; top: -20%; bottom: -20%; left: 0; width: 46%; z-index: -1; pointer-events: none;
-  background: linear-gradient(100deg, transparent 0%, rgba(255, 236, 190, .55) 50%, transparent 100%);
+  background: linear-gradient(100deg, transparent 0%, rgba(255, 244, 214, .8) 50%, transparent 100%);
   transform: translateX(-160%) skewX(-18deg); opacity: 0;
 }
-.corner.show .chip.glow { animation: rsvpGlow 3.2s ease-in-out 1.2s infinite; }
-.corner.show .chip.glow::after { animation: rsvpSheen 4.2s ease-in-out 1.6s infinite; }
-@keyframes rsvpGlow {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 210, 110, 0), 0 0 10px rgba(255, 200, 90, .4), 0 0 22px rgba(230, 170, 70, .22); }
-  50% { box-shadow: 0 0 0 3px rgba(255, 220, 130, .28), 0 0 20px rgba(255, 205, 100, .85), 0 0 42px rgba(235, 170, 60, .5); }
+#rsvpOpen::before, #infoOpen::before {   /* tiny twinkling sparkles inside the gold */
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; opacity: 0;
+  background:
+    radial-gradient(circle at 14% 32%, #fff 0 1.3px, transparent 2.6px),
+    radial-gradient(circle at 36% 74%, #fff6d8 0 1.1px, transparent 2.3px),
+    radial-gradient(circle at 58% 24%, #fff 0 1.4px, transparent 2.8px),
+    radial-gradient(circle at 81% 68%, #fff6d8 0 1.2px, transparent 2.5px),
+    radial-gradient(circle at 93% 30%, #fff 0 1px, transparent 2.2px);
 }
+.corner.show .chip.glow { animation: rsvpGlow 2.2s ease-in-out .6s infinite, rsvpBright 2.2s ease-in-out .6s infinite; }
+.corner.show .chip.glow::before { animation: rsvpTwinkle 1.7s ease-in-out .8s infinite; }
+.corner.show .chip.glow::after { animation: rsvpSheen 3s ease-in-out 1s infinite; }
+@keyframes rsvpGlow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 215, 120, 0), 0 0 14px rgba(255, 200, 90, .55), 0 0 34px rgba(235, 170, 60, .3); }
+  50% { box-shadow: 0 0 0 4px rgba(255, 225, 140, .3), 0 0 26px rgba(255, 208, 100, 1), 0 0 60px rgba(240, 175, 60, .7), 0 0 105px rgba(235, 165, 50, .38); }
+}
+@keyframes rsvpBright { 0%, 100% { filter: brightness(1) saturate(1); } 50% { filter: brightness(1.14) saturate(1.12); } }
+@keyframes rsvpTwinkle { 0%, 100% { opacity: .15; transform: scale(.96); } 45% { opacity: 1; transform: scale(1.04); } 70% { opacity: .35; } }
 @keyframes rsvpSheen {
   0% { transform: translateX(-160%) skewX(-18deg); opacity: 0; }
   12% { opacity: 1; }
@@ -265,7 +277,9 @@ video { display: block; width: 100%; height: 100%; object-fit: contain; backgrou
   if (PHONE) ro.hidden = false;
   /* after the answer is sent, "Подтвердить" stops glowing and "Детали" starts (only when the guest is coming); remembered on this device */
   var infoB = document.getElementById('infoOpen'), KEY = 'veronika-rsvp';
-  function applyAnswered(kind) { ro.classList.remove('glow'); if (kind === 'yes') infoB.classList.add('glow'); }
+  var answeredKind = null;
+  function applyAnswered(kind) { answeredKind = kind; ro.classList.remove('glow'); if (kind === 'yes') infoB.classList.add('glow'); }
+  function resumeGlow() { if (!answeredKind) ro.classList.add('glow'); }   /* the form was closed without an answer: keep nudging */
   try {
     if (/[?&]reset\b/.test(location.search)) localStorage.removeItem(KEY);
     var prevAnswer = localStorage.getItem(KEY); if (prevAnswer) applyAnswered(prevAnswer);
@@ -279,7 +293,7 @@ video { display: block; width: 100%; height: 100%; object-fit: contain; backgrou
     amaps.hidden = false; amaps.href = 'https://maps.apple.com/?daddr=' + enc(Q);
   } else { gm.classList.add('wide'); }
   if (ALBUM && new Date() >= ALBUM_FROM) { var al = document.getElementById('album'); al.href = ALBUM; al.hidden = false; }
-  document.getElementById('infoOpen').addEventListener('click', function () { sheet.hidden = true; info.hidden = false; });
+  document.getElementById('infoOpen').addEventListener('click', function () { sheet.hidden = true; info.hidden = false; resumeGlow(); });
   document.getElementById('infoClose').addEventListener('click', function () { info.hidden = true; });
   var copyB = document.getElementById('copyAddr');
   copyB.addEventListener('click', function () {
@@ -312,12 +326,12 @@ video { display: block; width: 100%; height: 100%; object-fit: contain; backgrou
     yes.setAttribute('aria-pressed', String(answer === 'yes')); no.setAttribute('aria-pressed', String(answer === 'no'));
   }
   function openSheet() {
-    info.hidden = true; sheet.hidden = false;
+    info.hidden = true; sheet.hidden = false; ro.classList.remove('glow');   /* opened: stop glowing */
     hint.textContent = inApp ? 'Приглашение открыто внутри другого приложения. Если WhatsApp не откроется, откройте ссылку в Chrome или Safari.'
       : 'Откроется WhatsApp с готовым сообщением, останется нажать «Отправить».';
   }
   ro.addEventListener('click', openSheet);
-  document.getElementById('rsvpClose').addEventListener('click', function () { sheet.hidden = true; });
+  document.getElementById('rsvpClose').addEventListener('click', function () { sheet.hidden = true; resumeGlow(); });
   yes.addEventListener('click', function () { answer = 'yes'; refresh(); });
   no.addEventListener('click', function () { answer = 'no'; refresh(); });
   document.getElementById('minus').addEventListener('click', function () { n = Math.max(1, n - 1); refresh(); });
