@@ -274,6 +274,7 @@ video { display: block; width: 100%; height: 100%; object-fit: contain; backgrou
   /* RSVP: answers go to the host's WhatsApp as a ready message (digits only, with country code) */
   var PHONE = '37125999483';
   var enc = encodeURIComponent;
+  var useIntent = /Android/.test(navigator.userAgent) && !/; wv\)/.test(navigator.userAgent);
   var ro = document.getElementById('rsvpOpen'), sheet = document.getElementById('sheet'), sendA = document.getElementById('rSend');
   var nameI = document.getElementById('rName'), cntRow = document.getElementById('rCount'), numO = document.getElementById('num'), hint = document.getElementById('rHint');
   var yes = document.getElementById('optYes'), no = document.getElementById('optNo'), answer = null, n = 1;
@@ -322,7 +323,10 @@ video { display: block; width: 100%; height: 100%; object-fit: contain; backgrou
   function refresh() {
     var ok = !!(nameI.value.trim() && answer);
     sendA.classList.toggle('off', !ok); sendA.setAttribute('aria-disabled', ok ? 'false' : 'true');
-    sendA.href = ok ? 'https://wa.me/' + PHONE + '?text=' + enc(msg()) : '#';
+    var wa = 'https://wa.me/' + PHONE + '?text=' + enc(msg());
+    /* Android (not a WebView): an intent without a package opens whichever of WhatsApp / WhatsApp Business is installed, or lets the guest pick
+       when both are; if neither handles it, Chrome falls back to the normal wa.me link. Everything else uses wa.me. */
+    sendA.href = !ok ? '#' : useIntent ? 'intent://send?phone=' + PHONE + '&text=' + enc(msg()) + '#Intent;scheme=whatsapp;S.browser_fallback_url=' + enc(wa) + ';end' : wa;
     cntRow.hidden = answer !== 'yes'; numO.textContent = n;
     yes.setAttribute('aria-pressed', String(answer === 'yes')); no.setAttribute('aria-pressed', String(answer === 'no'));
   }
@@ -340,12 +344,13 @@ video { display: block; width: 100%; height: 100%; object-fit: contain; backgrou
   document.getElementById('minus').addEventListener('click', function () { n = Math.max(1, n - 1); refresh(); });
   document.getElementById('plus').addEventListener('click', function () { n = Math.min(10, n + 1); refresh(); });
   nameI.addEventListener('input', refresh);
-  sendA.addEventListener('click', function (e) {
-    if (sendA.getAttribute('aria-disabled') === 'true') { e.preventDefault(); hint.textContent = nameI.value.trim() ? 'Выберите «Буду» или «Не смогу».' : 'Напишите, пожалуйста, ваше имя.'; return; }
+  function onSend(e) {
+    if (e.currentTarget.getAttribute('aria-disabled') === 'true') { e.preventDefault(); hint.textContent = nameI.value.trim() ? 'Выберите «Буду» или «Не смогу».' : 'Напишите, пожалуйста, ваше имя.'; return; }
     rFail.hidden = true;
     hint.textContent = 'Открываю WhatsApp…';
     thanksPending(answer);
-  });
+  }
+  sendA.addEventListener('click', onSend);
 
   /* thank-you screen: shown only when the guest comes back from WhatsApp, i.e. the page really went to the background.
      If the page never left within 2.2 s, WhatsApp did not open: show the manual fallback and do NOT mark the answer as sent. */
