@@ -204,7 +204,7 @@ video { display: block; width: 100%; height: 100%; object-fit: contain; backgrou
       <a class="go off" id="rSend" href="#" target="_blank" rel="noopener" aria-disabled="true">Отправить в WhatsApp</a>
       <p class="hint" id="rHint">Откроется WhatsApp с готовым сообщением, останется нажать «Отправить».</p>
       <div class="fail" id="rFail" hidden>
-        <p>WhatsApp не открылся. Скопируйте ответ и вставьте его в чат с <b id="rPhone"></b>.</p>
+        <p>WhatsApp не открылся или сразу закрылся. Скопируйте ответ и вставьте его в чат с <b id="rPhone"></b>.</p>
         <div class="acts">
           <button class="act" id="rCopy" type="button">Скопировать ответ</button>
           <a class="act" id="rApp" href="#">Открыть WhatsApp</a>
@@ -264,6 +264,13 @@ video { display: block; width: 100%; height: 100%; object-fit: contain; backgrou
   var Q = 'House of Light, Liepājas iela 56, Rīga';
   /* Google Maps route: opens the Maps app on a phone, the website otherwise */
   document.getElementById('gmaps').href = 'https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent(Q);
+  /* On phones the links open in the same tab: in-app browsers and some Android browsers swallow target=_blank (the page just flashes and comes back) */
+  var UA = navigator.userAgent;
+  if (/Android|iPhone|iPad|iPod/i.test(UA) || (/Macintosh/.test(UA) && navigator.maxTouchPoints > 1)) {
+    ['rSend', 'gmaps', 'amaps', 'album'].forEach(function (id) { var a = document.getElementById(id); if (a) a.removeAttribute('target'); });
+  }
+  /* WebView of another app (Android "; wv)", iOS without "Safari/"): tell the guest what to do if WhatsApp or Maps will not open */
+  var inApp = /; wv\)/.test(UA) || (/iPhone|iPad|iPod/.test(UA) && !/Safari\//.test(UA));
   /* RSVP: answers go to the host's WhatsApp as a ready message (digits only, with country code) */
   var PHONE = '37125999483';
   var enc = encodeURIComponent;
@@ -321,7 +328,11 @@ video { display: block; width: 100%; height: 100%; object-fit: contain; backgrou
   }
   var rFail = document.getElementById('rFail'), rApp = document.getElementById('rApp'), rCopy = document.getElementById('rCopy');
   document.getElementById('rPhone').textContent = '+' + PHONE.replace(/^(\d{3})(\d{2})(\d{3})(\d{3})$/, '$1 $2 $3 $4');
-  function openSheet() { info.hidden = true; sheet.hidden = false; rFail.hidden = true; hint.textContent = 'Откроется WhatsApp с готовым сообщением, останется нажать «Отправить».'; }
+  function openSheet() {
+    info.hidden = true; sheet.hidden = false; rFail.hidden = true;
+    hint.textContent = inApp ? 'Приглашение открыто внутри другого приложения. Если WhatsApp не откроется, откройте ссылку в Chrome или Safari.'
+      : 'Откроется WhatsApp с готовым сообщением, останется нажать «Отправить».';
+  }
   ro.addEventListener('click', openSheet);
   document.getElementById('rsvpClose').addEventListener('click', function () { sheet.hidden = true; });
   yes.addEventListener('click', function () { answer = 'yes'; refresh(); });
@@ -339,9 +350,10 @@ video { display: block; width: 100%; height: 100%; object-fit: contain; backgrou
   /* thank-you screen: shown only when the guest comes back from WhatsApp, i.e. the page really went to the background.
      If the page never left within 2.2 s, WhatsApp did not open: show the manual fallback and do NOT mark the answer as sent. */
   var thanks = document.getElementById('thanks'), cv = document.getElementById('confetti'), pend = null, timer = 0, raf = 0;
+  var hiddenAt = 0, AWAY_MIN = 3000;   /* the guest must stay away at least 3 s for the answer to count as sent */
   var still = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
   function thanksPending(kind) {
-    pend = kind; clearTimeout(timer);
+    pend = kind; hiddenAt = 0; clearTimeout(timer);
     timer = setTimeout(showFail, 2200);
   }
   function showFail() {
@@ -381,8 +393,13 @@ video { display: block; width: 100%; height: 100%; object-fit: contain; backgrou
   function clearCv() { cancelAnimationFrame(raf); var c = cv.getContext('2d'); c.setTransform(1, 0, 0, 1, 0, 0); c.clearRect(0, 0, cv.width, cv.height); }
   thanks.addEventListener('click', function () { thanks.classList.remove('on'); clearCv(); });
   document.addEventListener('visibilitychange', function () {
-    if (document.hidden) { if (pend) { clearTimeout(timer); } return; }
-    if (pend) setTimeout(function () { if (pend) showThanks(pend); }, 350);
+    if (document.hidden) { if (pend) { clearTimeout(timer); if (!hiddenAt) hiddenAt = Date.now(); } return; }
+    if (pend) {
+      /* WhatsApp that only flashes and closes brings the guest back within a second or two: that is not a sent answer */
+      var away = hiddenAt ? Date.now() - hiddenAt : AWAY_MIN; hiddenAt = 0;
+      if (away < AWAY_MIN) { showFail(); return; }
+      setTimeout(function () { if (pend) showThanks(pend); }, 350);
+    }
     else if (thanks.classList.contains('on') && !still && thanks.dataset.kind !== 'no') setTimeout(confetti, 350);
   });
   function confetti() {
