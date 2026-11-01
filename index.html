@@ -60,6 +60,15 @@ video { display: block; width: 100%; height: 100%; object-fit: contain; backgrou
 }
 .play i { width: 0; height: 0; margin-left: 8px; border-left: 30px solid #fcf4de; border-top: 19px solid transparent; border-bottom: 19px solid transparent; }
 .play.gone { opacity: 0; visibility: hidden; pointer-events: none; }
+/* Personal link (?g=Имя): a warm line under the play button, gone once the invitation starts */
+.greet {
+  position: absolute; left: 0; right: 0; top: calc(71% + 74px); margin: 0; padding: 0 22px; text-align: center; z-index: 1; pointer-events: none;
+  font: italic 500 21px/1.25 Georgia, "Times New Roman", serif; color: var(--gold-hi); overflow-wrap: anywhere;
+  text-shadow: 0 0 14px rgba(255, 205, 100, .6), 0 1px 3px rgba(0, 0, 0, .85);
+  transition: opacity .5s ease, visibility .5s;
+}
+.greet[hidden] { display: none; }
+.play.gone ~ .greet { opacity: 0; visibility: hidden; }
 @keyframes breathe { 0%, 100% { transform: translate(-50%, -50%) scale(1) } 50% { transform: translate(-50%, -50%) scale(1.06) } }
 
 .corner {
@@ -140,6 +149,7 @@ video { display: block; width: 100%; height: 100%; object-fit: contain; backgrou
 }
 .sheet[hidden] { display: block !important; opacity: 0; visibility: hidden; transform: translateY(16px); pointer-events: none; }
 .sheet h3 { margin: 0 0 14px; font: 600 22px/1.2 Georgia, "Times New Roman", serif; font-style: italic; color: var(--gold); text-align: center; }
+.sheet h3 { padding: 0 28px; overflow-wrap: anywhere; }   /* room for the × when a personal name makes the title long */
 .sheet .x { position: absolute; top: 8px; right: 8px; width: 40px; height: 40px; border: 0; border-radius: 50%; background: none; color: var(--cream); cursor: pointer; font-size: 22px; line-height: 1; opacity: .8; }
 .field { display: block; width: 100%; height: 50px; padding: 0 16px; margin: 0 0 12px; border-radius: 14px; border: 1px solid var(--line); background: rgba(255,255,255,.06); color: var(--cream); font: 500 16px/1 var(--body); }
 .field::placeholder { color: rgba(244,232,204,.5); }
@@ -198,12 +208,13 @@ video { display: block; width: 100%; height: 100%; object-fit: contain; backgrou
     <video id="v" src="invite.mp4" poster="poster.jpg" playsinline webkit-playsinline preload="auto" aria-label="Видео-приглашение на первый день рождения Вероники"></video>
     <canvas id="star" aria-hidden="true"></canvas>
     <button class="play" id="play" type="button" aria-label="Открыть приглашение"><i></i></button>
+    <p class="greet" id="greet" hidden></p>
     <button class="fsbtn" id="fs" type="button" hidden aria-label="На весь экран" title="На весь экран">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path id="fsIcon" d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
     </button>
     <div class="sheet" id="sheet" role="dialog" aria-label="Подтверждение прихода" hidden>
       <button class="x" id="rsvpClose" type="button" aria-label="Закрыть">×</button>
-      <h3>Вы придёте?</h3>
+      <h3 id="rsvpTitle">Вы придёте?</h3>
       <input class="field" id="rName" type="text" autocomplete="name" placeholder="Ваше имя" maxlength="60">
       <div class="choice">
         <button class="opt" id="optYes" type="button" aria-pressed="false">Буду</button>
@@ -281,6 +292,19 @@ video { display: block; width: 100%; height: 100%; object-fit: contain; backgrou
   var nameI = document.getElementById('rName'), cntRow = document.getElementById('rCount'), numO = document.getElementById('num'), hint = document.getElementById('rHint');
   var yes = document.getElementById('optYes'), no = document.getElementById('optNo'), answer = null, n = 1;
   if (PHONE) ro.hidden = false;
+  /* Personal link: ?g=Анна greets the guest and puts the name into the form; ?n=2 sets the number of guests.
+     The name is shown with textContent only, never as HTML. */
+  try {
+    var qs = new URLSearchParams(location.search);
+    var G = (qs.get('g') || '').replace(/[\u0000-\u001f\u007f<>]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 60);
+    var GN = parseInt(qs.get('n'), 10);
+    if (GN >= 1 && GN <= 10) n = GN;
+    if (G) {
+      nameI.value = G;
+      var gr = document.getElementById('greet'); gr.textContent = G + ', мы вас ждём!'; gr.hidden = false;
+      document.getElementById('rsvpTitle').textContent = G + ', вы придёте?';
+    }
+  } catch (e) {}
   /* after the answer is sent, "Подтвердить" stops glowing and "Детали" starts (only when the guest is coming); remembered on this device */
   var infoB = document.getElementById('infoOpen'), KEY = 'veronika-rsvp';
   var answeredKind = null;
@@ -343,6 +367,7 @@ video { display: block; width: 100%; height: 100%; object-fit: contain; backgrou
   document.getElementById('minus').addEventListener('click', function () { n = Math.max(1, n - 1); refresh(); });
   document.getElementById('plus').addEventListener('click', function () { n = Math.min(10, n + 1); refresh(); });
   nameI.addEventListener('input', refresh);
+  refresh();   /* shows a name and a guest count that came with a personal link */
   function onSend(e) {
     if (e.currentTarget.getAttribute('aria-disabled') === 'true') { e.preventDefault(); hint.textContent = nameI.value.trim() ? 'Выберите «Буду» или «Не смогу».' : 'Напишите, пожалуйста, ваше имя.'; return; }
     hint.textContent = 'Открываю WhatsApp…';
