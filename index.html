@@ -138,6 +138,12 @@ video { display: block; width: 100%; height: 100%; object-fit: contain; backgrou
 .go { display: flex; align-items: center; justify-content: center; height: 54px; border-radius: 999px; text-decoration: none; font: 700 17px/1 var(--body); color: #0c2c2a; background: linear-gradient(100deg, var(--gold-hi), #e0a852); box-shadow: 0 8px 26px rgba(230,170,70,.3); transition: opacity .2s; }
 .go.off { opacity: .4; box-shadow: none; }
 .hint { margin: 10px 0 0; min-height: 1.2em; text-align: center; font-size: 13px; color: var(--cream); opacity: .85; }
+/* shown only when WhatsApp did not open after the guest tapped send */
+.fail { margin: 12px 0 0; padding: 12px; border-radius: 16px; border: 1px solid var(--line); background: rgba(255,255,255,.05); text-align: center; font-size: 13px; line-height: 1.4; color: var(--cream); }
+.fail[hidden] { display: none !important; }
+.fail p { margin: 0 0 10px; }
+.fail p.sub { margin: 10px 0 0; opacity: .75; }
+.fail b { color: var(--gold-hi); white-space: nowrap; }
 .fsbtn { position: absolute; top: 10px; right: 10px; z-index: 4; width: 40px; height: 40px; padding: 0; border-radius: 50%; cursor: pointer;
   display: flex; align-items: center; justify-content: center; color: var(--gold); background: var(--glass); border: 1px solid var(--line);
   -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
@@ -156,7 +162,7 @@ video { display: block; width: 100%; height: 100%; object-fit: contain; backgrou
 .thanks p { margin: 0; font: 500 clamp(16px, min(4.6vw, 2.8svh), 22px)/1.45 var(--body); color: var(--cream); letter-spacing: .02em; }
 .thanks small { position: absolute; left: 0; right: 0; bottom: calc(66px + env(safe-area-inset-bottom, 0px)); font: 500 12px/1 var(--body); color: var(--cream); opacity: .5; letter-spacing: .06em; }
 /* details sheet: date, address, routes, calendar, album */
-#info { max-height: calc(100% - 20px); overflow-y: auto; }
+#info, #sheet { max-height: calc(100% - 20px); overflow-y: auto; }
 .facts { display: grid; gap: 10px; margin: 0 0 12px; }
 .fact { display: flex; align-items: flex-start; gap: 12px; padding: 12px 14px; border-radius: 14px; border: 1px solid var(--line); background: rgba(255,255,255,.05); }
 .fact > svg { width: 22px; height: 22px; flex: none; margin-top: 1px; color: var(--gold); }
@@ -197,6 +203,15 @@ video { display: block; width: 100%; height: 100%; object-fit: contain; backgrou
       </div>
       <a class="go off" id="rSend" href="#" target="_blank" rel="noopener" aria-disabled="true">Отправить в WhatsApp</a>
       <p class="hint" id="rHint">Откроется WhatsApp с готовым сообщением, останется нажать «Отправить».</p>
+      <div class="fail" id="rFail" hidden>
+        <p>WhatsApp не открылся. Скопируйте ответ и вставьте его в чат с <b id="rPhone"></b>.</p>
+        <div class="acts">
+          <button class="act" id="rCopy" type="button">Скопировать ответ</button>
+          <a class="act" id="rApp" href="#">Открыть WhatsApp</a>
+          <button class="act wide" id="rDone" type="button">Я уже отправил(а)</button>
+        </div>
+        <p class="sub">Если приглашение открыто внутри мессенджера, откройте его в Safari или Chrome и попробуйте ещё раз.</p>
+      </div>
     </div>
     <div class="sheet" id="info" role="dialog" aria-label="Детали праздника" hidden>
       <button class="x" id="infoClose" type="button" aria-label="Закрыть">×</button>
@@ -304,7 +319,9 @@ video { display: block; width: 100%; height: 100%; object-fit: contain; backgrou
     cntRow.hidden = answer !== 'yes'; numO.textContent = n;
     yes.setAttribute('aria-pressed', String(answer === 'yes')); no.setAttribute('aria-pressed', String(answer === 'no'));
   }
-  function openSheet() { info.hidden = true; sheet.hidden = false; hint.textContent = 'Откроется WhatsApp с готовым сообщением, останется нажать «Отправить».'; }
+  var rFail = document.getElementById('rFail'), rApp = document.getElementById('rApp'), rCopy = document.getElementById('rCopy');
+  document.getElementById('rPhone').textContent = '+' + PHONE.replace(/^(\d{3})(\d{2})(\d{3})(\d{3})$/, '$1 $2 $3 $4');
+  function openSheet() { info.hidden = true; sheet.hidden = false; rFail.hidden = true; hint.textContent = 'Откроется WhatsApp с готовым сообщением, останется нажать «Отправить».'; }
   ro.addEventListener('click', openSheet);
   document.getElementById('rsvpClose').addEventListener('click', function () { sheet.hidden = true; });
   yes.addEventListener('click', function () { answer = 'yes'; refresh(); });
@@ -314,21 +331,46 @@ video { display: block; width: 100%; height: 100%; object-fit: contain; backgrou
   nameI.addEventListener('input', refresh);
   sendA.addEventListener('click', function (e) {
     if (sendA.getAttribute('aria-disabled') === 'true') { e.preventDefault(); hint.textContent = nameI.value.trim() ? 'Выберите «Буду» или «Не смогу».' : 'Напишите, пожалуйста, ваше имя.'; return; }
-    hint.textContent = answer === 'no' ? 'Спасибо, что сообщили!' : 'Спасибо! Ждём вас.';
+    rFail.hidden = true;
+    hint.textContent = 'Открываю WhatsApp…';
     thanksPending(answer);
-    applyAnswered(answer);
-    try { localStorage.setItem(KEY, answer); } catch (e) {}
   });
 
-  /* thank-you screen: shown when the guest comes back from WhatsApp (or after 1.8 s if the page never lost focus) */
+  /* thank-you screen: shown only when the guest comes back from WhatsApp, i.e. the page really went to the background.
+     If the page never left within 2.2 s, WhatsApp did not open: show the manual fallback and do NOT mark the answer as sent. */
   var thanks = document.getElementById('thanks'), cv = document.getElementById('confetti'), pend = null, timer = 0, raf = 0;
   var still = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
   function thanksPending(kind) {
     pend = kind; clearTimeout(timer);
-    timer = setTimeout(function () { if (pend) showThanks(pend); }, 1800);
+    timer = setTimeout(showFail, 2200);
   }
+  function showFail() {
+    if (!pend) return;
+    rApp.href = 'whatsapp://send?phone=' + PHONE + '&text=' + enc(msg());
+    sheet.hidden = false; info.hidden = true;
+    hint.textContent = '';
+    rFail.hidden = false;
+  }
+  rApp.addEventListener('click', function () { thanksPending(answer); });
+  document.getElementById('rDone').addEventListener('click', function () { showThanks(answer); });
+  rCopy.addEventListener('click', function () {
+    var text = msg();
+    function ok() { rCopy.textContent = 'Скопировано'; setTimeout(function () { rCopy.textContent = 'Скопировать ответ'; }, 2200); }
+    function legacy() {
+      var t = document.createElement('textarea'), done = false;
+      t.value = text; t.setAttribute('readonly', ''); t.style.cssText = 'position:fixed;top:0;opacity:0';
+      document.body.appendChild(t); t.select(); t.setSelectionRange(0, t.value.length);
+      try { done = document.execCommand('copy'); } catch (e) {}
+      document.body.removeChild(t);
+      if (done) ok(); else rCopy.textContent = 'Не получилось';
+    }
+    try { navigator.clipboard.writeText(text).then(ok, legacy); } catch (e) { legacy(); }
+  });
   function showThanks(kind) {
     pend = null; clearTimeout(timer);
+    rFail.hidden = true;
+    applyAnswered(kind);
+    try { localStorage.setItem(KEY, kind); } catch (e) {}
     sheet.hidden = true; info.hidden = true;
     document.getElementById('thTitle').textContent = kind === 'yes' ? 'До скорых встреч!' : 'Спасибо за ответ!';
     document.getElementById('thText').textContent = kind === 'yes' ? '28 ноября в 14:30' : 'Жаль, что не получится.\nБудем думать о вас';
