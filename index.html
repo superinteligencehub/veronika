@@ -264,6 +264,13 @@ video { display: block; width: 100%; height: 100%; object-fit: contain; backgrou
   var Q = 'House of Light, Liepājas iela 56, Rīga';
   /* Google Maps route: opens the Maps app on a phone, the website otherwise */
   document.getElementById('gmaps').href = 'https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent(Q);
+  /* On phones the links open in the same tab: in-app browsers and some Android browsers swallow target=_blank (the page just flashes and comes back) */
+  var UA = navigator.userAgent;
+  if (/Android|iPhone|iPad|iPod/i.test(UA) || (/Macintosh/.test(UA) && navigator.maxTouchPoints > 1)) {
+    ['rSend', 'gmaps', 'amaps', 'album'].forEach(function (id) { var a = document.getElementById(id); if (a) a.removeAttribute('target'); });
+  }
+  /* WebView of another app (Android "; wv)", iOS without "Safari/"): tell the guest what to do if WhatsApp or Maps will not open */
+  var inApp = /; wv\)/.test(UA) || (/iPhone|iPad|iPod/.test(UA) && !/Safari\//.test(UA));
   /* RSVP: answers go to the host's WhatsApp as a ready message (digits only, with country code) */
   var PHONE = '37125999483';
   var enc = encodeURIComponent;
@@ -321,7 +328,11 @@ video { display: block; width: 100%; height: 100%; object-fit: contain; backgrou
   }
   var rFail = document.getElementById('rFail'), rApp = document.getElementById('rApp'), rCopy = document.getElementById('rCopy');
   document.getElementById('rPhone').textContent = '+' + PHONE.replace(/^(\d{3})(\d{2})(\d{3})(\d{3})$/, '$1 $2 $3 $4');
-  function openSheet() { info.hidden = true; sheet.hidden = false; rFail.hidden = true; hint.textContent = 'Откроется WhatsApp с готовым сообщением, останется нажать «Отправить».'; }
+  function openSheet() {
+    info.hidden = true; sheet.hidden = false; rFail.hidden = true;
+    hint.textContent = inApp ? 'Приглашение открыто внутри другого приложения. Если WhatsApp не откроется, откройте ссылку в Chrome или Safari.'
+      : 'Откроется WhatsApp с готовым сообщением, останется нажать «Отправить».';
+  }
   ro.addEventListener('click', openSheet);
   document.getElementById('rsvpClose').addEventListener('click', function () { sheet.hidden = true; });
   yes.addEventListener('click', function () { answer = 'yes'; refresh(); });
