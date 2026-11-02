@@ -60,15 +60,6 @@ video { display: block; width: 100%; height: 100%; object-fit: contain; backgrou
 }
 .play i { width: 0; height: 0; margin-left: 8px; border-left: 30px solid #fcf4de; border-top: 19px solid transparent; border-bottom: 19px solid transparent; }
 .play.gone { opacity: 0; visibility: hidden; pointer-events: none; }
-/* Personal link (?g=Имя): a warm line under the play button, gone once the invitation starts */
-.greet {
-  position: absolute; left: 0; right: 0; top: calc(71% + 74px); margin: 0; padding: 0 22px; text-align: center; z-index: 1; pointer-events: none;
-  font: italic 500 21px/1.25 Georgia, "Times New Roman", serif; color: var(--gold-hi); overflow-wrap: anywhere;
-  text-shadow: 0 0 14px rgba(255, 205, 100, .6), 0 1px 3px rgba(0, 0, 0, .85);
-  transition: opacity .5s ease, visibility .5s;
-}
-.greet[hidden] { display: none; }
-.play.gone ~ .greet { opacity: 0; visibility: hidden; }
 @keyframes breathe { 0%, 100% { transform: translate(-50%, -50%) scale(1) } 50% { transform: translate(-50%, -50%) scale(1.06) } }
 
 .corner {
@@ -208,7 +199,6 @@ video { display: block; width: 100%; height: 100%; object-fit: contain; backgrou
     <video id="v" src="invite.mp4" poster="poster.jpg" playsinline webkit-playsinline preload="auto" aria-label="Видео-приглашение на первый день рождения Вероники"></video>
     <canvas id="star" aria-hidden="true"></canvas>
     <button class="play" id="play" type="button" aria-label="Открыть приглашение"><i></i></button>
-    <p class="greet" id="greet" hidden></p>
     <button class="fsbtn" id="fs" type="button" hidden aria-label="На весь экран" title="На весь экран">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path id="fsIcon" d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
     </button>
@@ -292,7 +282,7 @@ video { display: block; width: 100%; height: 100%; object-fit: contain; backgrou
   var nameI = document.getElementById('rName'), cntRow = document.getElementById('rCount'), numO = document.getElementById('num'), hint = document.getElementById('rHint');
   var yes = document.getElementById('optYes'), no = document.getElementById('optNo'), answer = null, n = 1;
   if (PHONE) ro.hidden = false;
-  /* Personal link: ?g=Анна greets the guest and puts the name into the form; ?n=2 sets the number of guests.
+  /* Personal link: ?g=Анна puts the name into the form and its title; ?n=2 sets the number of guests.
      The name is shown with textContent only, never as HTML. */
   try {
     var qs = new URLSearchParams(location.search);
@@ -301,7 +291,6 @@ video { display: block; width: 100%; height: 100%; object-fit: contain; backgrou
     if (GN >= 1 && GN <= 10) n = GN;
     if (G) {
       nameI.value = G;
-      var gr = document.getElementById('greet'); gr.textContent = G + ', мы вас ждём!'; gr.hidden = false;
       document.getElementById('rsvpTitle').textContent = G + ', вы придёте?';
     }
   } catch (e) {}
