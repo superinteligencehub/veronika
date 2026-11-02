@@ -127,6 +127,17 @@ if (browserAvailable() && !process.argv.includes('--no-browser')) {
   });
   await closeBrowser();
 }
+// Не понижаем рабочий магазин из-за одной неудачной проверки (временная блокировка IP,
+// сбой сайта): сохраняем прошлую конфигурацию, ежедневный сбор сам покажет реальный статус.
+const prevBy = new Map(prev.map((p) => [p.domain, p]));
+for (const r of results) {
+  const p = prevBy.get(r.domain);
+  if (p?.status === 'auto' && r.status !== 'auto') {
+    const fails = (p.failedChecks ?? 0) + 1;
+    if (fails < 3) Object.assign(r, { ...p, failedChecks: fails, lastCheckNote: `${r.status}: ${r.note ?? ''}`.trim() });
+  }
+}
+
 // Ручные настройки
 const overrides = JSON.parse(await readFile(join(DIR, 'overrides.json'), 'utf8'));
 for (const r of results) if (overrides[r.domain]) Object.assign(r, overrides[r.domain]);
