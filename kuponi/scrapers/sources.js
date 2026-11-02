@@ -44,7 +44,20 @@ const NOTE = {
   'no-deals': 'Сайт открыт, но публичных цен со скидкой не найдено (акции в буклете/картинках/приложении).',
 };
 
-const discovered = loadRegistry()
+// Несколько доменов могут вести на один сайт (mothercare.lv → babycity.lv): берём один,
+// предпочитая домен, совпадающий с конечным сайтом.
+const hostOf = (r) => (r.origin ? new URL(r.origin).host.replace(/^www\./, '') : null);
+const registry = loadRegistry().sort((a, b) => Number(hostOf(b) === b.domain) - Number(hostOf(a) === a.domain));
+const usedHosts = new Set();
+const unique = registry.filter((r) => {
+  const h = hostOf(r);
+  if (!h) return true;
+  if (usedHosts.has(h)) return false;
+  usedHosts.add(h);
+  return true;
+});
+
+const discovered = unique
   .filter((r) => r.status !== 'unavailable' && !taken.has(r.id) && !taken.has(r.name.toLowerCase()) && r.category !== 'deals')
   .map((r) => ({
     id: r.id,

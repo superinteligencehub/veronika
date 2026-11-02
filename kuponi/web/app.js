@@ -198,7 +198,7 @@ function renderCats() {
   const counts = S.all.reduce((m, c) => m.set(c.category, (m.get(c.category) ?? 0) + 1), new Map());
   const cats = Object.entries(categories());
   $('#catChips').innerHTML = [`<button class="chip" data-cat="all" aria-pressed="${S.filters.cat === 'all'}">Все<small>${S.all.length}</small></button>`]
-    .concat(cats.map(([id, name]) => `<button class="chip" data-cat="${id}" aria-pressed="${S.filters.cat === id}">${CAT_ICONS[id] ?? ''} ${esc(name)}<small>${counts.get(id) ?? 0}</small></button>`))
+    .concat(cats.filter(([id]) => counts.get(id) || S.filters.cat === id).map(([id, name]) => `<button class="chip" data-cat="${id}" aria-pressed="${S.filters.cat === id}">${CAT_ICONS[id] ?? ''} ${esc(name)}<small>${counts.get(id) ?? 0}</small></button>`))
     .join('');
 }
 
