@@ -1,0 +1,21 @@
+name = "kuponi-push"
+main = "src/index.js"
+compatibility_date = "2026-10-01"
+
+# 05:00 и 06:00 UTC: одно из них — 08:00 по Риге (код сам проверяет час)
+[triggers]
+crons = ["0 5 * * *", "0 6 * * *"]
+
+[vars]
+# Публичный VAPID-ключ (из `npm run vapid`) — тот же, что в web/config.js
+VAPID_PUBLIC_KEY = ""
+VAPID_SUBJECT = "mailto:you@example.com"
+# Сайт приложения (GitHub Pages), с которого разрешены подписки
+ALLOWED_ORIGIN = "https://superinteligencehub.github.io"
+
+# KV для подписок: `npx wrangler kv namespace create SUBS` и вставьте id
+[[kv_namespaces]]
+binding = "SUBS"
+id = "REPLACE_WITH_KV_ID"
+
+# Секрет (не в этом файле!): npx wrangler secret put VAPID_PRIVATE_JWK

@@ -1,0 +1,23 @@
+{
+  "name": "Kuponi LV — купоны и скидки Латвии",
+  "short_name": "Kuponi LV",
+  "description": "Все актуальные купоны и акции магазинов Латвии, отсортированные по выгоде. С переводом на русский.",
+  "lang": "ru",
+  "start_url": "./#feed",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0b1220",
+  "theme_color": "#0f766e",
+  "categories": ["shopping", "lifestyle"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ],
+  "shortcuts": [
+    { "name": "Лучшее сегодня", "url": "./#best" },
+    { "name": "Поиск", "url": "./#search" }
+  ]
+}

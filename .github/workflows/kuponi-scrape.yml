@@ -1,0 +1,55 @@
+name: Kuponi LV — сбор купонов
+
+on:
+  schedule:
+    # 03:17 UTC = 05:17 (зима) / 06:17 (лето) по Риге — до утреннего уведомления в 08:00
+    - cron: '17 3 * * *'
+  workflow_dispatch:
+    inputs:
+      only:
+        description: 'Только эти источники (через запятую, напр. rimi,lidl). Пусто — все.'
+        required: false
+        default: ''
+
+permissions:
+  contents: write
+
+concurrency:
+  group: kuponi-scrape
+  cancel-in-progress: false
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: kuponi
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: kuponi/package-lock.json
+      - run: npm ci
+      - name: Тесты парсеров
+        run: npm test
+      - name: Сбор данных
+        # Ошибка одного источника не роняет сбор: статус пишется в data/coupons.json
+        run: node scrapers/run.js ${{ inputs.only && format('--only {0}', inputs.only) || '' }}
+      - name: Сохранить данные
+        run: |
+          git config user.name "kuponi-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/coupons.json data/translations.json
+          if git diff --cached --quiet; then
+            echo "Данные не изменились"
+            exit 0
+          fi
+          git commit -m "Kuponi LV: данные за $(TZ=Europe/Riga date +%F)"
+          for i in 1 2 3 4; do
+            git pull --rebase origin "${GITHUB_REF_NAME}" && git push origin "HEAD:${GITHUB_REF_NAME}" && exit 0
+            sleep $((2 ** i))
+          done
+          exit 1
