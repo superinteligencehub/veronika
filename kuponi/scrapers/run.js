@@ -19,6 +19,7 @@ import { rigaDate } from './lib/util.js';
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const DATA = join(ROOT, 'data');
 const OUT = join(DATA, 'coupons.json');
+const STALE_DAYS = Number(process.env.KUPONI_STALE_DAYS ?? 3);
 const SCRAPER_TIMEOUT_MS = Number(process.env.KUPONI_SCRAPER_TIMEOUT_MS ?? 8 * 60 * 1000);
 
 const args = process.argv.slice(2);
@@ -92,11 +93,14 @@ async function main() {
       return { state: { ...base, status: 'ok', count: res.coupons.length, lastSuccess: new Date().toISOString(), durationMs: res.durationMs }, coupons: res.coupons };
     }
     // Ошибка: показываем прошлые (ещё не просроченные) купоны с пометкой «устарело»
-    const stale = filterActive(prevOf(), today).map((c) => ({ ...c, stale: true }));
+    // …но не дольше STALE_DAYS после последнего успешного сбора: у многих товаров нет срока акции
+    const lastOk = prevState.lastSuccess ? Date.parse(prevState.lastSuccess) : 0;
+    const fresh = Date.now() - lastOk < STALE_DAYS * 24 * 3600 * 1000;
+    const stale = fresh ? filterActive(prevOf(), today).map((c) => ({ ...c, stale: true })) : [];
     return {
       state: {
         ...base,
-        status: res.status === 'blocked' ? 'manual' : stale.length ? 'stale' : 'error',
+        status: stale.length ? 'stale' : res.status === 'blocked' ? 'manual' : 'error',
         error: res.error,
         count: stale.length,
         lastSuccess: prevState.lastSuccess ?? null,
