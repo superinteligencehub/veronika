@@ -5,13 +5,8 @@
   "category": "auto",
   "id": "adbaltic-lv",
   "checked": "2026-11-02",
-  "origin": "https://adbaltic.lv",
-  "url": "https://adbaltic.lv/",
-  "status": "no-deals",
-  "platform": "html",
-  "saleLinks": [],
-  "sample": 0,
-  "note": "Цен со скидкой на сайте не найдено даже в браузере (акции в PDF/картинках/приложении)"
+  "status": "blocked",
+  "note": "HTTP 403, проверка бота"
  },
  {
   "domain": "amberauto.lv",
@@ -61,7 +56,7 @@
   "platform": "html",
   "saleLinks": [],
   "sample": 0,
-  "note": "Цен со скидкой на сайте не найдено даже в браузере (акции в PDF/картинках/приложении)"
+  "note": "Публичных цен со скидкой не найдено (акции в PDF/картинках/приложении)"
  },
  {
   "domain": "intercars.lv",
@@ -80,11 +75,11 @@
   "checked": "2026-11-02",
   "origin": "https://kool.lv",
   "url": "https://kool.lv/",
-  "status": "blocked",
+  "status": "no-deals",
   "platform": "html",
   "saleLinks": [],
   "sample": 0,
-  "note": "проверка бота (в браузере)"
+  "note": "Публичных цен со скидкой не найдено (акции в PDF/картинках/приложении)"
  },
  {
   "domain": "neste.lv",
@@ -94,7 +89,7 @@
   "checked": "2026-11-02",
   "origin": "https://www.neste.lv",
   "url": "https://www.neste.lv/",
-  "status": "blocked",
+  "status": "no-deals",
   "platform": "html",
   "saleLinks": [
    "https://www.neste.lv/privatpersonam/klientu-ieguvumi/partneru-piedavajumi/hesburger",
@@ -102,7 +97,7 @@
    "https://www.neste.lv/privatpersonam/klientu-ieguvumi/partneru-piedavajumi/narvesen"
   ],
   "sample": 0,
-  "note": "проверка бота (в браузере)"
+  "note": "Публичных цен со скидкой не найдено (акции в PDF/картинках/приложении)"
  },
  {
   "domain": "riepas1.lv",
@@ -118,7 +113,7 @@
    "https://riepas1.lv/lv/akcijas"
   ],
   "sample": 0,
-  "note": "Цен со скидкой на сайте не найдено даже в браузере (акции в PDF/картинках/приложении)"
+  "note": "Публичных цен со скидкой не найдено (акции в PDF/картинках/приложении)"
  },
  {
   "domain": "riepu-centrs.lv",
@@ -141,7 +136,7 @@
   "platform": "html",
   "saleLinks": [],
   "sample": 0,
-  "note": "Цен со скидкой на сайте не найдено даже в браузере (акции в PDF/картинках/приложении)"
+  "note": "Публичных цен со скидкой не найдено (акции в PDF/картинках/приложении)"
  },
  {
   "domain": "viada.lv",
@@ -149,8 +144,17 @@
   "category": "auto",
   "id": "viada-lv",
   "checked": "2026-11-02",
-  "status": "blocked",
-  "note": "HTTP 503, проверка бота"
+  "origin": "https://www.viada.lv",
+  "url": "https://www.viada.lv/",
+  "status": "no-deals",
+  "platform": "html",
+  "saleLinks": [
+   "https://www.viada.lv/jaunumi-un-piedavajumi/",
+   "https://www.viada.lv/ambition-produktu-akcija/",
+   "https://www.viada.lv/akcijas/veikala-akcijas/"
+  ],
+  "sample": 0,
+  "note": "Публичных цен со скидкой не найдено (акции в PDF/картинках/приложении)"
  },
  {
   "domain": "vianor.lv",
@@ -164,7 +168,7 @@
   "platform": "html",
   "saleLinks": [],
   "sample": 0,
-  "note": "Цен со скидкой на сайте не найдено даже в браузере (акции в PDF/картинках/приложении)"
+  "note": "Публичных цен со скидкой не найдено (акции в PDF/картинках/приложении)"
  },
  {
   "domain": "virsi.lv",
@@ -181,7 +185,7 @@
    "https://www.virsi.lv/lv/privatpersonam/edieni-dzerieni-pakalpojumi"
   ],
   "sample": 0,
-  "note": "Цен со скидкой на сайте не найдено даже в браузере (акции в PDF/картинках/приложении)"
+  "note": "Публичных цен со скидкой не найдено (акции в PDF/картинках/приложении)"
  },
  {
   "domain": "apotheka.lv",
@@ -196,9 +200,10 @@
   "saleUrls": [
    "https://www.apotheka.lv/",
    "https://www.apotheka.lv/piedavajumi",
+   "https://www.apotheka.lv/noliktavas-atlaides",
    "https://www.apotheka.lv/piedavajumi/visi-ipasie-piedavajumi"
   ],
-  "sample": 92
+  "sample": 126
  },
  {
   "domain": "apteka.lv",
@@ -215,8 +220,8 @@
   "category": "beauty",
   "id": "aptiekualianse-lv",
   "checked": "2026-11-02",
-  "status": "blocked",
-  "note": "HTTP 403, проверка бота"
+  "status": "unavailable",
+  "note": "ENOTFOUND"
  },
  {
   "domain": "benu.lv",
@@ -251,7 +256,7 @@
    "https://www.douglas.lv/lv/outlet/",
    "https://www.douglas.lv/lv/katalogs/super-cena/"
   ],
-  "sample": 70
+  "sample": 71
  },
  {
   "domain": "euroaptieka.lv",
@@ -269,7 +274,7 @@
    "https://www.euroaptieka.lv/l/150-ar-50-akcija"
   ],
   "sample": 0,
-  "note": "Цен со скидкой на сайте не найдено даже в браузере (акции в PDF/картинках/приложении)"
+  "note": "Публичных цен со скидкой не найдено (акции в PDF/картинках/приложении)"
  },
  {
   "domain": "gimenesaptieka.lv",
@@ -286,8 +291,8 @@
   "category": "beauty",
   "id": "inglot-lv",
   "checked": "2026-11-02",
-  "status": "blocked",
-  "note": "HTTP 503, проверка бота"
+  "status": "unavailable",
+  "note": "DEPTH_ZERO_SELF_SIGNED_CERT"
  },
  {
   "domain": "kristiana.lv",
@@ -311,8 +316,8 @@
   "category": "beauty",
   "id": "lyko-lv",
   "checked": "2026-11-02",
-  "status": "blocked",
-  "note": "HTTP 503, проверка бота"
+  "status": "unavailable",
+  "note": "ERR_TLS_CERT_ALTNAME_INVALID"
  },
  {
   "domain": "manaaptieka.lv",
@@ -326,7 +331,7 @@
   "platform": "html",
   "saleLinks": [],
   "sample": 0,
-  "note": "Цен со скидкой на сайте не найдено даже в браузере (акции в PDF/картинках/приложении)"
+  "note": "Публичных цен со скидкой не найдено (акции в PDF/картинках/приложении)"
  },
  {
   "domain": "menessaptieka.lv",
@@ -340,7 +345,7 @@
   "platform": "html",
   "saleLinks": [],
   "sample": 0,
-  "note": "Цен со скидкой на сайте не найдено даже в браузере (акции в PDF/картинках/приложении)"
+  "note": "Публичных цен со скидкой не найдено (акции в PDF/картинках/приложении)"
  },
  {
   "domain": "multilukss.lv",
@@ -375,8 +380,8 @@
   "category": "beauty",
   "id": "siberika-lv",
   "checked": "2026-11-02",
-  "status": "blocked",
-  "note": "HTTP 503, проверка бота"
+  "status": "unavailable",
+  "note": "UND_ERR_CONNECT_TIMEOUT"
  },
  {
   "domain": "gramatnica.lv",
@@ -390,7 +395,7 @@
   "platform": "html",
   "saleLinks": [],
   "sample": 0,
-  "note": "Цен со скидкой на сайте не найдено даже в браузере (акции в PDF/картинках/приложении)"
+  "note": "Публичных цен со скидкой не найдено (акции в PDF/картинках/приложении)"
  },
  {
   "domain": "jr.lv",
@@ -398,16 +403,8 @@
   "category": "books",
   "id": "jr-lv",
   "checked": "2026-11-02",
-  "origin": "https://www.janisroze.lv",
-  "url": "https://www.janisroze.lv/",
-  "status": "auto",
-  "platform": "html",
-  "saleUrls": [
-   "https://www.janisroze.lv/janis-roze-akcijas",
-   "https://www.janisroze.lv/lv/janis-roze-akcijas",
-   "https://www.janisroze.lv/lv/test1/nedelas-ipasais-piedavajums"
-  ],
-  "sample": 33
+  "status": "blocked",
+  "note": "HTTP 403, проверка бота"
  },
  {
   "domain": "kanclers.lv",
@@ -417,11 +414,15 @@
   "checked": "2026-11-02",
   "origin": "https://kanclers.lv",
   "url": "https://kanclers.lv/",
-  "status": "blocked",
+  "status": "auto",
   "platform": "html",
-  "saleLinks": [],
-  "sample": 0,
-  "note": "проверка бота (в браузере)"
+  "saleUrls": [
+   "https://kanclers.lv/",
+   "https://kanclers.lv/velosipedi/izpardosana/velosipeds-limber-18-zils-ar-rlimc1820",
+   "https://kanclers.lv/velosipedi/izpardosana/velosipeds-limber-20-grafit-ar-rlimc2030",
+   "https://kanclers.lv/velosipedi/izpardosana/velosipeds-romet-rambler-26-r6-1-ar-2226150-21xl-melns"
+  ],
+  "sample": 31
  },
  {
   "domain": "zvaigzne.lv",
@@ -459,7 +460,7 @@
   "platform": "html",
   "saleLinks": [],
   "sample": 0,
-  "note": "Цен со скидкой на сайте не найдено даже в браузере (акции в PDF/картинках/приложении)"
+  "note": "Публичных цен со скидкой не найдено (акции в PDF/картинках/приложении)"
  },
  {
   "domain": "cenuklubs.lv",
@@ -467,8 +468,13 @@
   "category": "deals",
   "id": "cenuklubs-lv",
   "checked": "2026-11-02",
-  "status": "blocked",
-  "note": "HTTP 503, проверка бота"
+  "origin": "https://cenuklubs.lv",
+  "url": "https://cenuklubs.lv/",
+  "status": "no-deals",
+  "platform": "html",
+  "saleLinks": [],
+  "sample": 0,
+  "note": "Публичных цен со скидкой не найдено (акции в PDF/картинках/приложении)"
  },
  {
   "domain": "cido.lv",
@@ -476,8 +482,8 @@
   "category": "deals",
   "id": "cido-lv",
   "checked": "2026-11-02",
-  "status": "blocked",
-  "note": "HTTP 503, проверка бота"
+  "status": "unavailable",
+  "note": "UND_ERR_CONNECT_TIMEOUT"
  },
  {
   "domain": "iepirkumi.lv",
@@ -491,7 +497,7 @@
   "platform": "html",
   "saleLinks": [],
   "sample": 0,
-  "note": "Цен со скидкой на сайте не найдено даже в браузере (акции в PDF/картинках/приложении)"
+  "note": "Публичных цен со скидкой не найдено (акции в PDF/картинках/приложении)"
  },
  {
   "domain": "kimbino.lv",
@@ -509,7 +515,7 @@
    "https://www.kimbino.lv/maxima/maxima-akciju-buklets-no-otrdienas-03-11-2026-6004123/"
   ],
   "sample": 0,
-  "note": "Цен со скидкой на сайте не найдено даже в браузере (акции в PDF/картинках/приложении)"
+  "note": "Публичных цен со скидкой не найдено (акции в PDF/картинках/приложении)"
  },
  {
   "domain": "kuponi.lv",
@@ -517,8 +523,8 @@
   "category": "deals",
   "id": "kuponi-lv",
   "checked": "2026-11-02",
-  "status": "blocked",
-  "note": "HTTP 503, проверка бота"
+  "status": "unavailable",
+  "note": "ERR_TLS_CERT_ALTNAME_INVALID"
  },
  {
   "domain": "kurpirkt.lv",
@@ -550,7 +556,7 @@
   "platform": "html",
   "saleLinks": [],
   "sample": 0,
-  "note": "Цен со скидкой на сайте не найдено даже в браузере (акции в PDF/картинках/приложении)"
+  "note": "Публичных цен со скидкой не найдено (акции в PDF/картинках/приложении)"
  },
  {
   "domain": "pricer.lv",
@@ -576,13 +582,8 @@
   "category": "deals",
   "id": "salidzini-lv",
   "checked": "2026-11-02",
-  "origin": "https://www.salidzini.lv",
-  "url": "https://www.salidzini.lv/",
-  "status": "no-deals",
-  "platform": "html",
-  "saleLinks": [],
-  "sample": 0,
-  "note": "Цен со скидкой на сайте не найдено даже в браузере (акции в PDF/картинках/приложении)"
+  "status": "blocked",
+  "note": "HTTP 403, проверка бота"
  },
  {
   "domain": "tiendeo.lv",
@@ -599,16 +600,8 @@
   "category": "deals",
   "id": "vietas-lv",
   "checked": "2026-11-02",
-  "origin": "https://www.vietas.lv",
-  "url": "https://www.vietas.lv/",
-  "status": "no-deals",
-  "platform": "html",
-  "saleLinks": [
-   "https://www.vietas.lv/?p=10&cat=6",
-   "https://www.vietas.lv/index.php?p=29"
-  ],
-  "sample": 0,
-  "note": "Цен со скидкой на сайте не найдено даже в браузере (акции в PDF/картинках/приложении)"
+  "status": "blocked",
+  "note": "HTTP 403, проверка бота"
  },
  {
   "domain": "visasakcijas.lv",
@@ -626,7 +619,7 @@
    "https://www.visasakcijas.lv/lidl-akcijas.htm"
   ],
   "sample": 0,
-  "note": "Цен со скидкой на сайте не найдено даже в браузере (акции в PDF/картинках/приложении)"
+  "note": "Публичных цен со скидкой не найдено (акции в PDF/картинках/приложении)"
  },
  {
   "domain": "food.bolt.eu",
@@ -640,7 +633,7 @@
   "platform": "html",
   "saleLinks": [],
   "sample": 0,
-  "note": "Цен со скидкой на сайте не найдено даже в браузере (акции в PDF/картинках/приложении)"
+  "note": "Публичных цен со скидкой не найдено (акции в PDF/картинках/приложении)"
  },
  {
   "domain": "wolt.com",
@@ -654,7 +647,7 @@
   "platform": "html",
   "saleLinks": [],
   "sample": 0,
-  "note": "Цен со скидкой на сайте не найдено даже в браузере (акции в PDF/картинках/приложении)"
+  "note": "Публичных цен со скидкой не найдено (акции в PDF/картинках/приложении)"
  },
  {
   "domain": "220.lv",
@@ -664,7 +657,7 @@
   "checked": "2026-11-02",
   "origin": "https://220.lv",
   "url": "https://220.lv/lv/",
-  "status": "blocked",
+  "status": "no-deals",
   "platform": "html",
   "saleLinks": [
    "https://220.lv/lv/lapaspuse/sausaligi-labi-piedavajumi?source=HeaderRunningLine",
@@ -672,7 +665,7 @@
    "https://220.lv/lv/lapaspuse/marketplace-ipasie-piedavajumi"
   ],
   "sample": 0,
-  "note": "проверка бота (в браузере)"
+  "note": "Публичных цен со скидкой не найдено (акции в PDF/картинках/приложении)"
  },
  {
   "domain": "aio.lv",
@@ -689,15 +682,8 @@
   "category": "electronics",
   "id": "dateks-lv",
   "checked": "2026-11-02",
-  "origin": "https://www.dateks.lv",
-  "url": "https://www.dateks.lv/",
-  "status": "no-deals",
-  "platform": "html",
-  "saleLinks": [
-   "https://www.dateks.lv/cenas/outlet"
-  ],
-  "sample": 0,
-  "note": "Цен со скидкой на сайте не найдено даже в браузере (акции в PDF/картинках/приложении)"
+  "status": "blocked",
+  "note": "HTTP 403, проверка бота"
  },
  {
   "domain": "datorcentrs.lv",
@@ -705,8 +691,8 @@
   "category": "electronics",
   "id": "datorcentrs-lv",
   "checked": "2026-11-02",
-  "status": "blocked",
-  "note": "HTTP 503, проверка бота"
+  "status": "unavailable",
+  "note": "UND_ERR_CONNECT_TIMEOUT"
  },
  {
   "domain": "elkor.lv",
@@ -738,13 +724,13 @@
   "category": "electronics",
   "id": "gigant-lv",
   "checked": "2026-11-02",
-  "origin": "https://gigant.lv",
-  "url": "https://gigant.lv/",
+  "origin": "https://www.gigant.lv",
+  "url": "https://www.gigant.lv/",
   "status": "no-deals",
   "platform": "html",
   "saleLinks": [],
   "sample": 0,
-  "note": "Цен со скидкой на сайте не найдено даже в браузере (акции в PDF/картинках/приложении)"
+  "note": "Публичных цен со скидкой не найдено (акции в PDF/картинках/приложении)"
  },
  {
   "domain": "ideal.lv",
@@ -758,7 +744,7 @@
   "platform": "html",
   "saleLinks": [],
   "sample": 0,
-  "note": "Цен со скидкой на сайте не найдено даже в браузере (акции в PDF/картинках/приложении)"
+  "note": "Публичных цен со скидкой не найдено (акции в PDF/картинках/приложении)"
  },
  {
   "domain": "istore.lv",
@@ -776,7 +762,7 @@
   "id": "mistore-lv",
   "checked": "2026-11-02",
   "status": "unavailable",
-  "note": "ENOTFOUND"
+  "note": "UND_ERR_CONNECT_TIMEOUT"
  },
  {
   "domain": "ordi.lv",
@@ -826,7 +812,7 @@
   "platform": "html",
   "saleLinks": [],
   "sample": 0,
-  "note": "Цен со скидкой на сайте не найдено даже в браузере (акции в PDF/картинках/приложении)"
+  "note": "Публичных цен со скидкой не найдено (акции в PDF/картинках/приложении)"
  },
  {
   "domain": "apranga.lv",
@@ -840,7 +826,7 @@
   "platform": "html",
   "saleLinks": [],
   "sample": 0,
-  "note": "Цен со скидкой на сайте не найдено даже в браузере (акции в PDF/картинках/приложении)"
+  "note": "Публичных цен со скидкой не найдено (акции в PDF/картинках/приложении)"
  },
  {
   "domain": "bikkembergs.lv",
@@ -863,7 +849,7 @@
   "platform": "html",
   "saleLinks": [],
   "sample": 0,
-  "note": "Цен со скидкой на сайте не найдено даже в браузере (акции в PDF/картинках/приложении)"
+  "note": "Публичных цен со скидкой не найдено (акции в PDF/картинках/приложении)"
  },
  {
   "domain": "deichmann.com/lv-lv",
@@ -895,7 +881,7 @@
   "platform": "html",
   "saleLinks": [],
   "sample": 0,
-  "note": "Цен со скидкой на сайте не найдено даже в браузере (акции в PDF/картинках/приложении)"
+  "note": "Публичных цен со скидкой не найдено (акции в PDF/картинках/приложении)"
  },
  {
   "domain": "euroskor.lv",
@@ -903,8 +889,8 @@
   "category": "fashion",
   "id": "euroskor-lv",
   "checked": "2026-11-02",
-  "status": "blocked",
-  "note": "HTTP 503, проверка бота"
+  "status": "unavailable",
+  "note": "ERR_TLS_CERT_ALTNAME_INVALID"
  },
  {
   "domain": "glamour.lv",
@@ -930,8 +916,8 @@
   "category": "fashion",
   "id": "kappahl-lv",
   "checked": "2026-11-02",
-  "status": "blocked",
-  "note": "HTTP 503, проверка бота"
+  "status": "unavailable",
+  "note": "ERR_TLS_CERT_ALTNAME_INVALID"
  },
  {
   "domain": "lindex.com/lv",
@@ -963,7 +949,7 @@
   "platform": "html",
   "saleLinks": [],
   "sample": 0,
-  "note": "Цен со скидкой на сайте не найдено даже в браузере (акции в PDF/картинках/приложении)"
+  "note": "Публичных цен со скидкой не найдено (акции в PDF/картинках/приложении)"
  },
  {
   "domain": "newyorker.de/lv",
@@ -977,7 +963,7 @@
   "platform": "html",
   "saleLinks": [],
   "sample": 0,
-  "note": "Цен со скидкой на сайте не найдено даже в браузере (акции в PDF/картинках/приложении)"
+  "note": "Публичных цен со скидкой не найдено (акции в PDF/картинках/приложении)"
  },
  {
   "domain": "pinkpanther.lv",
@@ -1000,7 +986,7 @@
   "platform": "html",
   "saleLinks": [],
   "sample": 0,
-  "note": "Цен со скидкой на сайте не найдено даже в браузере (акции в PDF/картинках/приложении)"
+  "note": "Публичных цен со скидкой не найдено (акции в PDF/картинках/приложении)"
  },
  {
   "domain": "sinsay.com/lv",
@@ -1014,7 +1000,7 @@
   "platform": "html",
   "saleLinks": [],
   "sample": 0,
-  "note": "Цен со скидкой на сайте не найдено даже в браузере (акции в PDF/картинках/приложении)"
+  "note": "Публичных цен со скидкой не найдено (акции в PDF/картинках/приложении)"
  },
  {
   "domain": "takko.lv",
@@ -1028,7 +1014,7 @@
   "platform": "html",
   "saleLinks": [],
   "sample": 0,
-  "note": "Цен со скидкой на сайте не найдено даже в браузере (акции в PDF/картинках/приложении)"
+  "note": "Публичных цен со скидкой не найдено (акции в PDF/картинках/приложении)"
  },
  {
   "domain": "zara.com/lv",
@@ -1053,7 +1039,7 @@
    "https://burgerking.lv/piedavajumi/"
   ],
   "sample": 0,
-  "note": "Цен со скидкой на сайте не найдено даже в браузере (акции в PDF/картинках/приложении)"
+  "note": "Публичных цен со скидкой не найдено (акции в PDF/картинках/приложении)"
  },
  {
   "domain": "caffeine.lv",
@@ -1073,8 +1059,8 @@
   "category": "fastfood",
   "id": "cilipica-lv",
   "checked": "2026-11-02",
-  "status": "blocked",
-  "note": "HTTP 503, проверка бота"
+  "status": "unavailable",
+  "note": "ERR_TLS_CERT_ALTNAME_INVALID"
  },
  {
   "domain": "dominos.lv",
@@ -1084,11 +1070,11 @@
   "checked": "2026-11-02",
   "origin": "https://dominospizza.lv",
   "url": "https://dominospizza.lv/lv/riga/",
-  "status": "blocked",
+  "status": "no-deals",
   "platform": "html",
   "saleLinks": [],
   "sample": 0,
-  "note": "проверка бота (в браузере)"
+  "note": "Публичных цен со скидкой не найдено (акции в PDF/картинках/приложении)"
  },
  {
   "domain": "hesburger.lv",
@@ -1104,7 +1090,7 @@
    "https://www.hesburger.lv/--dienkarte/akcijas"
   ],
   "sample": 0,
-  "note": "Цен со скидкой на сайте не найдено даже в браузере (акции в PDF/картинках/приложении)"
+  "note": "Публичных цен со скидкой не найдено (акции в PDF/картинках/приложении)"
  },
  {
   "domain": "kfc.lv",
@@ -1122,7 +1108,7 @@
    "https://kfc.lv/produktiem/pusdienu-piedavajums-2/"
   ],
   "sample": 0,
-  "note": "Цен со скидкой на сайте не найдено даже в браузере (акции в PDF/картинках/приложении)"
+  "note": "Публичных цен со скидкой не найдено (акции в PDF/картинках/приложении)"
  },
  {
   "domain": "lido.lv",
@@ -1132,13 +1118,13 @@
   "checked": "2026-11-02",
   "origin": "https://www.lido.lv",
   "url": "https://www.lido.lv/lv/",
-  "status": "blocked",
+  "status": "no-deals",
   "platform": "html",
   "saleLinks": [
    "https://www.lido.lv/lv/jusu-pasakumi/piedavajumi-turistu-grupam/"
   ],
   "sample": 0,
-  "note": "проверка бота (в браузере)"
+  "note": "Публичных цен со скидкой не найдено (акции в PDF/картинках/приложении)"
  },
  {
   "domain": "picalulu.lv",
@@ -1179,7 +1165,7 @@
   "platform": "html",
   "saleLinks": [],
   "sample": 0,
-  "note": "Цен со скидкой на сайте не найдено даже в браузере (акции в PDF/картинках/приложении)"
+  "note": "Публичных цен со скидкой не найдено (акции в PDF/картинках/приложении)"
  },
  {
   "domain": "apollokino.lv",
@@ -1206,7 +1192,7 @@
    "https://www.bilesuserviss.lv/vispareja-informacija/promoters/394/reklamas-iespejas"
   ],
   "sample": 0,
-  "note": "Цен со скидкой на сайте не найдено даже в браузере (акции в PDF/картинках/приложении)"
+  "note": "Публичных цен со скидкой не найдено (акции в PDF/картинках/приложении)"
  },
  {
   "domain": "cinamon.lv",
@@ -1229,11 +1215,11 @@
   "platform": "html",
   "saleLinks": [
    "https://www.forumcinemas.lv/news/articles/2024-02-27/4138/Kino-Kluba-atlaides-ari-kino-uzkodam-un-dzerieniem/",
-   "https://www.forumcinemas.lv/websales/show/442637/",
-   "https://www.forumcinemas.lv/websales/show/442636/?scrollTo=contentEventShows"
+   "https://www.forumcinemas.lv/websales/show/442648/",
+   "https://www.forumcinemas.lv/websales/show/442675/"
   ],
   "sample": 0,
-  "note": "Цен со скидкой на сайте не найдено даже в браузере (акции в PDF/картинках/приложении)"
+  "note": "Публичных цен со скидкой не найдено (акции в PDF/картинках/приложении)"
  },
  {
   "domain": "livuakvaparks.lv",
@@ -1259,7 +1245,7 @@
    "https://ticketshop.lv/lv/events/108408"
   ],
   "sample": 0,
-  "note": "Цен со скидкой на сайте не найдено даже в браузере (акции в PDF/картинках/приложении)"
+  "note": "Публичных цен со скидкой не найдено (акции в PDF/картинках/приложении)"
  },
  {
   "domain": "aibe.lv",
@@ -1267,17 +1253,8 @@
   "category": "groceries",
   "id": "aibe-lv",
   "checked": "2026-11-02",
-  "origin": "https://aibe.lv",
-  "url": "https://aibe.lv/",
   "status": "blocked",
-  "platform": "html",
-  "saleLinks": [
-   "https://aibe.lv/akciju-avizes/",
-   "https://aibe.lv/akcijas/",
-   "https://aibe.lv/darba-piedavajumi/"
-  ],
-  "sample": 0,
-  "note": "проверка бота (в браузере)"
+  "note": "HTTP 403, проверка бота"
  },
  {
   "domain": "alkoutlet.lv",
@@ -1290,9 +1267,10 @@
   "status": "auto",
   "platform": "html",
   "saleUrls": [
-   "https://alkoutlet.lv/"
+   "https://alkoutlet.lv/",
+   "https://alkoutlet.lv/krekls-alkoutlet-unisex-meitene-garais.html"
   ],
-  "sample": 3
+  "sample": 5
  },
  {
   "domain": "barbora.lv",
@@ -1302,16 +1280,13 @@
   "checked": "2026-11-02",
   "origin": "https://barbora.lv",
   "url": "https://barbora.lv/",
-  "status": "auto",
-  "platform": "browser",
+  "status": "no-deals",
+  "platform": "html",
   "saleLinks": [
    "https://barbora.lv/cl/50XV/akcijas"
   ],
-  "sample": 96,
-  "saleUrls": [
-   "https://barbora.lv/",
-   "https://barbora.lv/cl/50XV/akcijas"
-  ]
+  "sample": 2,
+  "note": "Публичных цен со скидкой не найдено (акции в PDF/картинках/приложении)"
  },
  {
   "domain": "citro.lv",
@@ -1327,7 +1302,7 @@
    "https://citro.lv/akcijas/"
   ],
   "sample": 0,
-  "note": "Цен со скидкой на сайте не найдено даже в браузере (акции в PDF/картинках/приложении)"
+  "note": "Публичных цен со скидкой не найдено (акции в PDF/картинках/приложении)"
  },
  {
   "domain": "elvi.lv",
@@ -1345,7 +1320,7 @@
    "https://elvi.lv/izmekleti-un-mileti-produkti-akcija/"
   ],
   "sample": 0,
-  "note": "Цен со скидкой на сайте не найдено даже в браузере (акции в PDF/картинках/приложении)"
+  "note": "Публичных цен со скидкой не найдено (акции в PDF/картинках/приложении)"
  },
  {
   "domain": "gardumi.lv",
@@ -1359,7 +1334,7 @@
   "platform": "html",
   "saleLinks": [],
   "sample": 0,
-  "note": "Цен со скидкой на сайте не найдено даже в браузере (акции в PDF/картинках/приложении)"
+  "note": "Публичных цен со скидкой не найдено (акции в PDF/картинках/приложении)"
  },
  {
   "domain": "lats.lv",
@@ -1376,8 +1351,8 @@
   "category": "groceries",
   "id": "latvijasbalzams-lv",
   "checked": "2026-11-02",
-  "status": "blocked",
-  "note": "HTTP 503, проверка бота"
+  "status": "unavailable",
+  "note": "ERR_TLS_CERT_ALTNAME_INVALID"
  },
  {
   "domain": "mego.lv",
@@ -1393,7 +1368,7 @@
    "https://mego.lv/akcijas-un-piedavajumi-2/"
   ],
   "sample": 0,
-  "note": "Цен со скидкой на сайте не найдено даже в браузере (акции в PDF/картинках/приложении)"
+  "note": "Публичных цен со скидкой не найдено (акции в PDF/картинках/приложении)"
  },
  {
   "domain": "narvesen.lv",
@@ -1413,16 +1388,8 @@
   "category": "groceries",
   "id": "nuko-lv",
   "checked": "2026-11-02",
-  "origin": "https://nuko.lv",
-  "url": "https://nuko.lv/",
-  "status": "auto",
-  "platform": "html",
-  "saleUrls": [
-   "https://nuko.lv/",
-   "https://nuko.lv/lv/visas-preces/izpardosana",
-   "https://nuko.lv/visas-preces?am_on_sale="
-  ],
-  "sample": 34
+  "status": "blocked",
+  "note": "HTTP 403, проверка бота"
  },
  {
   "domain": "promo.lv",
@@ -1447,7 +1414,7 @@
    "https://www.spiritsandwine.lv/lv/sarkanas"
   ],
   "sample": 0,
-  "note": "Цен со скидкой на сайте не найдено даже в браузере (акции в PDF/картинках/приложении)"
+  "note": "Публичных цен со скидкой не найдено (акции в PDF/картинках/приложении)"
  },
  {
   "domain": "top.lv",
@@ -1461,7 +1428,7 @@
   "platform": "html",
   "saleLinks": [],
   "sample": 0,
-  "note": "Цен со скидкой на сайте не найдено даже в браузере (акции в PDF/картинках/приложении)"
+  "note": "Публичных цен со скидкой не найдено (акции в PDF/картинках/приложении)"
  },
  {
   "domain": "vesko.lv",
@@ -1485,10 +1452,10 @@
   "saleLinks": [
    "https://vynoteka.lv/piedavajumi",
    "https://vynoteka.lv/izdevigi-cenu-piedavajumi",
-   "https://vynoteka.lv/montelvini-promosso-prosecco-extra-dry-075-l"
+   "https://vynoteka.lv/sales"
   ],
   "sample": 0,
-  "note": "Цен со скидкой на сайте не найдено даже в браузере (акции в PDF/картинках/приложении)"
+  "note": "Публичных цен со скидкой не найдено (акции в PDF/картинках/приложении)"
  },
  {
   "domain": "avoti.lv",
@@ -1502,7 +1469,7 @@
   "platform": "html",
   "saleLinks": [],
   "sample": 0,
-  "note": "Цен со скидкой на сайте не найдено даже в браузере (акции в PDF/картинках/приложении)"
+  "note": "Публичных цен со скидкой не найдено (акции в PDF/картинках/приложении)"
  },
  {
   "domain": "depo.lv",
@@ -1516,7 +1483,7 @@
   "platform": "html",
   "saleLinks": [],
   "sample": 0,
-  "note": "Цен со скидкой на сайте не найдено даже в браузере (акции в PDF/картинках/приложении)"
+  "note": "Публичных цен со скидкой не найдено (акции в PDF/картинках/приложении)"
  },
  {
   "domain": "home4you.lv",
@@ -1542,17 +1509,8 @@
   "category": "home",
   "id": "ikea-lv",
   "checked": "2026-11-02",
-  "origin": "https://www.ikea.com",
-  "url": "https://www.ikea.com/lv/lv/",
-  "status": "no-deals",
-  "platform": "html",
-  "saleLinks": [
-   "https://www.ikea.com/lv/lv/offers/",
-   "https://www.ikea.com/lv/lv/offers/family-offers/",
-   "https://www.ikea.com/lv/lv/new/new-products/"
-  ],
-  "sample": 0,
-  "note": "Цен со скидкой на сайте не найдено даже в браузере (акции в PDF/картинках/приложении)"
+  "status": "blocked",
+  "note": "HTTP 403, проверка бота"
  },
  {
   "domain": "jumbo.lv",
@@ -1578,17 +1536,8 @@
   "category": "home",
   "id": "kruza-lv",
   "checked": "2026-11-02",
-  "origin": "https://www.kruza.lv",
-  "url": "https://www.kruza.lv/",
-  "status": "auto",
-  "platform": "html",
-  "saleUrls": [
-   "https://www.kruza.lv/",
-   "https://www.kruza.lv/akcijas-preces/",
-   "https://www.kruza.lv/katalogs/izpardosana/flizes-izpardosana/",
-   "https://www.kruza.lv/katalogs/izpardosana/tapetes-izpardosana/"
-  ],
-  "sample": 48
+  "status": "blocked",
+  "note": "HTTP 403, проверка бота"
  },
  {
   "domain": "ksenukai.lv",
@@ -1596,15 +1545,8 @@
   "category": "home",
   "id": "ksenukai-lv",
   "checked": "2026-11-02",
-  "origin": "https://www.ksenukai.lv",
-  "url": "https://www.ksenukai.lv/",
-  "status": "auto",
-  "platform": "html",
-  "saleUrls": [
-   "https://www.ksenukai.lv/c/sports-brivais-laiks-turisms/piepusamas-atrakcijas-matraci-peldrinki/ocb",
-   "https://www.ksenukai.lv/c/sports-brivais-laiks-turisms/piepusamas-atrakcijas-matraci-peldrinki/piepusamas-atrakcijas/occ"
-  ],
-  "sample": 64
+  "status": "blocked",
+  "note": "HTTP 403, проверка бота"
  },
  {
   "domain": "kursi.lv",
@@ -1612,16 +1554,8 @@
   "category": "home",
   "id": "kursi-lv",
   "checked": "2026-11-02",
-  "origin": "https://www.kursi.lv",
-  "url": "https://www.kursi.lv/",
-  "status": "auto",
-  "platform": "html",
-  "saleUrls": [
-   "https://www.kursi.lv/",
-   "https://www.kursi.lv/lv/outlet",
-   "https://www.kursi.lv/lv/visas-kampanas/akcijas"
-  ],
-  "sample": 26
+  "status": "blocked",
+  "note": "HTTP 403, проверка бота"
  },
  {
   "domain": "lilija.lv",
@@ -1635,7 +1569,7 @@
   "platform": "html",
   "saleLinks": [],
   "sample": 0,
-  "note": "Цен со скидкой на сайте не найдено даже в браузере (акции в PDF/картинках/приложении)"
+  "note": "Публичных цен со скидкой не найдено (акции в PDF/картинках/приложении)"
  },
  {
   "domain": "majaiundarzam.lv",
@@ -1645,11 +1579,11 @@
   "checked": "2026-11-02",
   "origin": "https://majaiundarzam.lv",
   "url": "https://majaiundarzam.lv/",
-  "status": "blocked",
+  "status": "no-deals",
   "platform": "html",
   "saleLinks": [],
   "sample": 0,
-  "note": "проверка бота (в браузере)"
+  "note": "Публичных цен со скидкой не найдено (акции в PDF/картинках/приложении)"
  },
  {
   "domain": "mebeles1.lv",
@@ -1657,8 +1591,15 @@
   "category": "home",
   "id": "mebeles1-lv",
   "checked": "2026-11-02",
-  "status": "blocked",
-  "note": "HTTP 403, проверка бота"
+  "origin": "https://www.mebeles1.lv",
+  "url": "https://www.mebeles1.lv/",
+  "status": "no-deals",
+  "platform": "html",
+  "saleLinks": [
+   "https://www.mebeles1.lv/izpardosana"
+  ],
+  "sample": 0,
+  "note": "Публичных цен со скидкой не найдено (акции в PDF/картинках/приложении)"
  },
  {
   "domain": "pepco.lv",
@@ -1668,13 +1609,13 @@
   "checked": "2026-11-02",
   "origin": "https://pepco.lv",
   "url": "https://pepco.lv/",
-  "status": "blocked",
+  "status": "no-deals",
   "platform": "html",
   "saleLinks": [
    "https://pepco.lv/kolekcijas/top-piedavajumi"
   ],
   "sample": 0,
-  "note": "проверка бота (в браузере)"
+  "note": "Публичных цен со скидкой не найдено (акции в PDF/картинках/приложении)"
  },
  {
   "domain": "pigu.lt/lv",
@@ -1691,8 +1632,8 @@
   "category": "home",
   "id": "sanistal-lv",
   "checked": "2026-11-02",
-  "status": "blocked",
-  "note": "HTTP 503, проверка бота"
+  "status": "unavailable",
+  "note": "ECONNREFUSED"
  },
  {
   "domain": "superselection.lv",
@@ -1700,15 +1641,8 @@
   "category": "home",
   "id": "superselection-lv",
   "checked": "2026-11-02",
-  "origin": "https://superselection.lv",
-  "url": "https://superselection.lv/",
-  "status": "auto",
-  "platform": "html",
-  "saleUrls": [
-   "https://superselection.lv/",
-   "https://superselection.lv/lv/special"
-  ],
-  "sample": 63
+  "status": "blocked",
+  "note": "HTTP 403, проверка бота"
  },
  {
   "domain": "tedi.lv",
@@ -1734,7 +1668,7 @@
    "https://www.babycity.lv/lv/izpardosana-atlaides-nesummejas-un-attiecas-uz-noteiktam-precem/0525",
    "https://www.babycity.lv/lv/starpsezonu-izpardosana-apgerbiem-un-apaviem/CMP009252"
   ],
-  "sample": 75,
+  "sample": 0,
   "note": "Страница распродажи (рендер в браузере), цены и срок из пометки «Regulārā cena / Akcija derīga līdz»",
   "saleUrls": [
    "https://www.babycity.lv/lv/izpardosana-atlaides-nesummejas-un-attiecas-uz-noteiktam-precem/0525"
@@ -1756,8 +1690,8 @@
   "category": "kids",
   "id": "babyshop-lv",
   "checked": "2026-11-02",
-  "status": "blocked",
-  "note": "HTTP 503, проверка бота"
+  "status": "unavailable",
+  "note": "CERT_HAS_EXPIRED"
  },
  {
   "domain": "bebe.lv",
@@ -1765,8 +1699,8 @@
   "category": "kids",
   "id": "bebe-lv",
   "checked": "2026-11-02",
-  "status": "blocked",
-  "note": "HTTP 202, проверка бота"
+  "status": "unavailable",
+  "note": "UND_ERR_SOCKET"
  },
  {
   "domain": "bernupasaule.lv",
@@ -1781,8 +1715,8 @@
   "saleLinks": [
    "https://bernupasaule.lv/produkti/akcijas"
   ],
-  "sample": 0,
-  "note": "Цен со скидкой на сайте не найдено даже в браузере (акции в PDF/картинках/приложении)"
+  "sample": 2,
+  "note": "Публичных цен со скидкой не найдено (акции в PDF/картинках/приложении)"
  },
  {
   "domain": "bernuprecesrigā.lv",
@@ -1826,8 +1760,13 @@
   "category": "kids",
   "id": "gudrinieks-lv",
   "checked": "2026-11-02",
-  "status": "unavailable",
-  "note": "HTTP 404"
+  "origin": "https://gudrinieks.lv",
+  "url": "https://gudrinieks.lv/",
+  "status": "no-deals",
+  "platform": "html",
+  "saleLinks": [],
+  "sample": 0,
+  "note": "Публичных цен со скидкой не найдено (акции в PDF/картинках/приложении)"
  },
  {
   "domain": "kidi.lv",
@@ -1841,7 +1780,7 @@
   "platform": "html",
   "saleLinks": [],
   "sample": 0,
-  "note": "Цен со скидкой на сайте не найдено даже в браузере (акции в PDF/картинках/приложении)"
+  "note": "Публичных цен со скидкой не найдено (акции в PDF/картинках/приложении)"
  },
  {
   "domain": "kidsworld.lv",
@@ -1900,7 +1839,7 @@
   "platform": "html",
   "saleLinks": [],
   "sample": 0,
-  "note": "Цен со скидкой на сайте не найдено даже в браузере (акции в PDF/картинках/приложении)"
+  "note": "Публичных цен со скидкой не найдено (акции в PDF/картинках/приложении)"
  },
  {
   "domain": "lupilu.lv",
@@ -1926,8 +1865,8 @@
   "category": "kids",
   "id": "mazulis-lv",
   "checked": "2026-11-02",
-  "status": "blocked",
-  "note": "HTTP 202, проверка бота"
+  "status": "unavailable",
+  "note": "UND_ERR_SOCKET"
  },
  {
   "domain": "mimikid.lv",
@@ -1953,17 +1892,14 @@
   "checked": "2026-11-02",
   "origin": "https://www.babycity.lv",
   "url": "https://www.babycity.lv/lv/mothercare",
-  "status": "auto",
-  "platform": "browser",
+  "status": "no-deals",
+  "platform": "html",
   "saleLinks": [
    "https://www.babycity.lv/lv/visas-akcijas",
    "https://www.babycity.lv/lv/izpardosana-atlaides-nesummejas-un-attiecas-uz-noteiktam-precem/0525"
   ],
-  "sample": 66,
-  "saleUrls": [
-   "https://www.babycity.lv/lv/mothercare",
-   "https://www.babycity.lv/lv/izpardosana-atlaides-nesummejas-un-attiecas-uz-noteiktam-precem/0525"
-  ]
+  "sample": 0,
+  "note": "Публичных цен со скидкой не найдено (акции в PDF/картинках/приложении)"
  },
  {
   "domain": "nordbaby.lv",
@@ -1977,7 +1913,7 @@
   "platform": "html",
   "saleLinks": [],
   "sample": 0,
-  "note": "Цен со скидкой на сайте не найдено даже в браузере (акции в PDF/картинках/приложении)"
+  "note": "Публичных цен со скидкой не найдено (акции в PDF/картинках/приложении)"
  },
  {
   "domain": "rotallietas.lv",
@@ -2028,8 +1964,8 @@
   "category": "kids",
   "id": "toys-lv",
   "checked": "2026-11-02",
-  "status": "blocked",
-  "note": "HTTP 503, проверка бота"
+  "status": "unavailable",
+  "note": "UND_ERR_CONNECT_TIMEOUT"
  },
  {
   "domain": "tutu.lv",
@@ -2046,17 +1982,8 @@
   "category": "pets",
   "id": "dinozoo-lv",
   "checked": "2026-11-02",
-  "origin": "https://www.dinozoo.lv",
-  "url": "https://www.dinozoo.lv/",
-  "status": "auto",
-  "platform": "html",
-  "saleUrls": [
-   "https://www.dinozoo.lv/",
-   "https://www.dinozoo.lv/menesa-liela-akcija",
-   "https://www.dinozoo.lv/menesa-liela-akcija/",
-   "https://www.dinozoo.lv/izdevigs-piedavajums-no-hills/"
-  ],
-  "sample": 71
+  "status": "blocked",
+  "note": "HTTP 403, проверка бота"
  },
  {
   "domain": "petcity.lv",
@@ -2064,8 +1991,17 @@
   "category": "pets",
   "id": "petcity-lv",
   "checked": "2026-11-02",
-  "status": "blocked",
-  "note": "HTTP 503, проверка бота"
+  "origin": "https://www.petcity.lv",
+  "url": "https://www.petcity.lv/",
+  "status": "no-deals",
+  "platform": "html",
+  "saleLinks": [
+   "https://www.petcity.lv/akcija",
+   "https://www.petcity.lv/akcija/petcity-draugs-menesa-piedavajums",
+   "https://www.petcity.lv/akcija/perc-vairak-maksa-mazak"
+  ],
+  "sample": 0,
+  "note": "Публичных цен со скидкой не найдено (акции в PDF/картинках/приложении)"
  },
  {
   "domain": "zoocentrs.lv",
@@ -2100,8 +2036,8 @@
   "category": "sport",
   "id": "adidas-lv",
   "checked": "2026-11-02",
-  "status": "blocked",
-  "note": "HTTP 503, проверка бота"
+  "status": "unavailable",
+  "note": "CERT_HAS_EXPIRED"
  },
  {
   "domain": "decathlon.lv",
@@ -2118,8 +2054,8 @@
   "category": "sport",
   "id": "intersport-lv",
   "checked": "2026-11-02",
-  "status": "blocked",
-  "note": "HTTP 503, проверка бота"
+  "status": "unavailable",
+  "note": "ERR_SSL_TLSV1_UNRECOGNIZED_NAME"
  },
  {
   "domain": "nike.com/lv",
@@ -2147,13 +2083,11 @@
   "checked": "2026-11-02",
   "origin": "https://sportland.lv",
   "url": "https://sportland.lv/",
-  "status": "auto",
-  "platform": "browser",
+  "status": "no-deals",
+  "platform": "html",
   "saleLinks": [],
-  "sample": 5,
-  "saleUrls": [
-   "https://sportland.lv/"
-  ]
+  "sample": 0,
+  "note": "Публичных цен со скидкой не найдено (акции в PDF/картинках/приложении)"
  },
  {
   "domain": "sportsdirect.lv",
@@ -2165,9 +2099,12 @@
   "url": "https://www.sportsdirect.lv/",
   "status": "no-deals",
   "platform": "html",
-  "saleLinks": [],
+  "saleLinks": [
+   "https://www.sportsdirect.lv/daily-deals",
+   "https://www.sportsdirect.lv/sale"
+  ],
   "sample": 0,
-  "note": "Цен со скидкой на сайте не найдено даже в браузере (акции в PDF/картинках/приложении)"
+  "note": "Публичных цен со скидкой не найдено (акции в PDF/картинках/приложении)"
  },
  {
   "domain": "sportsshop.lv",
@@ -2199,7 +2136,7 @@
   "platform": "html",
   "saleLinks": [],
   "sample": 0,
-  "note": "Цен со скидкой на сайте не найдено даже в браузере (акции в PDF/картинках/приложении)"
+  "note": "Публичных цен со скидкой не найдено (акции в PDF/картинках/приложении)"
  },
  {
   "domain": "bite.lv",
@@ -2207,8 +2144,17 @@
   "category": "telecom",
   "id": "bite-lv",
   "checked": "2026-11-02",
-  "status": "blocked",
-  "note": "HTTP 403, проверка бота"
+  "origin": "https://www.bite.lv",
+  "url": "https://www.bite.lv/lv",
+  "status": "auto",
+  "platform": "html",
+  "saleUrls": [
+   "https://www.bite.lv/lv",
+   "https://www.bite.lv/lv/akcijas",
+   "https://www.bite.lv/lv/noliktavas-izpardosana",
+   "https://www.bite.lv/lv/piedavajumi"
+  ],
+  "sample": 99
  },
  {
   "domain": "lmt.lv",
@@ -2216,17 +2162,8 @@
   "category": "telecom",
   "id": "lmt-lv",
   "checked": "2026-11-02",
-  "origin": "https://www.lmt.lv",
-  "url": "https://www.lmt.lv/",
-  "status": "blocked",
-  "platform": "html",
-  "saleLinks": [
-   "https://www.lmt.lv/akcijas",
-   "https://www.lmt.lv/veikals/izpardosana",
-   "https://www.lmt.lv/akcijas/iekartas?utm_source=lmt&utm_medium=owned&utm_content=giga&utm_campaign=261102_iekartas_multivendori"
-  ],
-  "sample": 0,
-  "note": "проверка бота (в браузере)"
+  "status": "unavailable",
+  "note": "UND_ERR_CONNECT_TIMEOUT"
  },
  {
   "domain": "tele2.lv",
@@ -2238,13 +2175,9 @@
   "url": "https://www.tele2.lv/",
   "status": "no-deals",
   "platform": "html",
-  "saleLinks": [
-   "https://www.tele2.lv/akcijas/",
-   "https://www.tele2.lv/iericu-akcija/?filter=1&IS=1&type=akcijas",
-   "https://www.tele2.lv/iericu-akcija/?filter=1&IS=1&type=outlet"
-  ],
+  "saleLinks": [],
   "sample": 0,
-  "note": "Цен со скидкой на сайте не найдено даже в браузере (акции в PDF/картинках/приложении)"
+  "note": "Публичных цен со скидкой не найдено (акции в PDF/картинках/приложении)"
  },
  {
   "domain": "tet.lv",
@@ -2262,7 +2195,7 @@
    "https://www.tet.lv/akcijas/vairak-neka-vtv"
   ],
   "sample": 0,
-  "note": "Цен со скидкой на сайте не найдено даже в браузере (акции в PDF/картинках/приложении)"
+  "note": "Публичных цен со скидкой не найдено (акции в PDF/картинках/приложении)"
  },
  {
   "domain": "airbaltic.com",
@@ -2277,10 +2210,10 @@
   "saleLinks": [
    "https://www.airbaltic.com/en/flight-deals/flights",
    "https://www.airbaltic.com/en/campaign/sale",
-   "https://www.airbaltic.com/en/flight-deals/flights-to-kuusamo"
+   "https://www.airbaltic.com/en/flight-deals/flights-to-alicante"
   ],
   "sample": 0,
-  "note": "Цен со скидкой на сайте не найдено даже в браузере (акции в PDF/картинках/приложении)"
+  "note": "Публичных цен со скидкой не найдено (акции в PDF/картинках/приложении)"
  },
  {
   "domain": "pv.lv",
@@ -2296,6 +2229,6 @@
    "https://vivi.lv/lv/izmainas-un-jaunumi/jaunumi/336/ar-miniona-braucienu-vilciena-aizsakas-vivi-un-forum-cinemas-sadarbiba/"
   ],
   "sample": 0,
-  "note": "Цен со скидкой на сайте не найдено даже в браузере (акции в PDF/картинках/приложении)"
+  "note": "Публичных цен со скидкой не найдено (акции в PDF/картинках/приложении)"
  }
 ]
