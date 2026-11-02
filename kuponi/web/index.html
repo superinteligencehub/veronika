@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Kuponi LV</title>
+  <meta name="description" content="Купоны, скидки и акции магазинов Латвии в одном месте — с переводом на русский.">
+  <meta name="theme-color" content="#0f766e" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0b1220" media="(prefers-color-scheme: dark)">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="styles.css">
+  <script src="config.js"></script>
+  <script type="module" src="app.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <img src="icons/icon.svg" alt="" width="28" height="28">
+      <div>
+        <h1>Kuponi LV</h1>
+        <p class="updated" id="updated">Загрузка…</p>
+      </div>
+    </div>
+    <button class="icon-btn" id="themeBtn" aria-label="Сменить тему" title="Тема">◐</button>
+  </header>
+
+  <div class="offline-banner" id="offlineBanner" hidden>Нет сети — показаны сохранённые данные</div>
+
+  <main id="main">
+    <!-- Лента -->
+    <section class="view" id="view-feed" data-view="feed">
+      <div class="chips" id="catChips" role="tablist" aria-label="Категории"></div>
+      <div class="toolbar">
+        <button class="pill" id="filterBtn" aria-haspopup="dialog">Фильтры <span class="count" id="filterCount" hidden></span></button>
+        <label class="toggle-pill"><input type="checkbox" id="endsTodayQuick"><span>Сегодня последний день</span></label>
+        <label class="toggle-pill"><input type="checkbox" id="myStoresQuick"><span>Мои магазины</span></label>
+        <select id="sortSel" class="pill" aria-label="Сортировка">
+          <option value="eur">Выгода, €</option>
+          <option value="pct">Выгода, %</option>
+          <option value="ends">Скоро закончится</option>
+          <option value="price">Цена</option>
+          <option value="new">Новые</option>
+        </select>
+      </div>
+      <p class="result-count" id="feedCount"></p>
+      <div class="cards" id="feedList"></div>
+      <div class="sentinel" id="feedMore"></div>
+    </section>
+
+    <!-- Лучшее сегодня -->
+    <section class="view" id="view-best" data-view="best" hidden>
+      <h2 class="view-title">Лучшее сегодня</h2>
+      <p class="hint">Топ по реальной выгоде в евро (на 1 покупку). Учитываются только действующие сегодня предложения.</p>
+      <div class="chips" id="bestScope"></div>
+      <ol class="cards ranked" id="bestList"></ol>
+      <h3 class="section-title" id="endingTitle">Заканчиваются сегодня</h3>
+      <div class="cards" id="endingList"></div>
+      <h3 class="section-title" id="catalogTitle">Буклеты акций</h3>
+      <p class="hint">Сети, у которых акции публикуются только в буклете (PDF): открывайте по ссылке.</p>
+      <div class="cards" id="catalogList"></div>
+    </section>
+
+    <!-- Поиск -->
+    <section class="view" id="view-search" data-view="search" hidden>
+      <form class="search-box" id="searchForm" role="search">
+        <input type="search" id="searchInput" placeholder="молоко, кофе, масло для двигателя…" autocomplete="off" enterkeyhint="search">
+      </form>
+      <div class="chips" id="searchSuggest"></div>
+      <div id="compare"></div>
+      <div class="cards" id="searchList"></div>
+    </section>
+
+    <!-- Избранное -->
+    <section class="view" id="view-fav" data-view="fav" hidden>
+      <h2 class="view-title">Избранное</h2>
+      <div class="cards" id="favList"></div>
+      <h3 class="section-title">Мои магазины</h3>
+      <p class="hint">Отметьте магазины, которыми пользуетесь — включайте «Мои магазины» в ленте, и утреннее уведомление будет про них.</p>
+      <div class="store-grid" id="myStoresGrid"></div>
+    </section>
+
+    <!-- Ещё -->
+    <section class="view" id="view-more" data-view="more" hidden>
+      <h2 class="view-title">Уведомления</h2>
+      <div class="panel" id="pushPanel"></div>
+
+      <h2 class="view-title">Добавить купон вручную</h2>
+      <div class="panel">
+        <p class="hint">Для закрытых источников (приложения McDonald's, Wolt, Drogas…): заполните вручную или выберите фото/скриншот — текст и цены распознаются автоматически (в браузере).</p>
+        <button class="btn primary" id="addCouponBtn">+ Добавить купон</button>
+        <div class="cards" id="manualList"></div>
+        <div class="row-actions" id="manualActions" hidden>
+          <button class="btn" id="exportManual">Экспорт для data/manual.json</button>
+        </div>
+      </div>
+
+      <h2 class="view-title">Источники</h2>
+      <p class="hint" id="sourcesSummary"></p>
+      <div class="toolbar">
+        <input type="search" id="sourceFilter" class="pill" placeholder="Найти магазин…" aria-label="Найти магазин">
+        <select id="sourceStatus" class="pill" aria-label="Статус">
+          <option value="all">Все</option><option value="ok">Работают</option><option value="manual">Ручной ввод</option>
+          <option value="planned">Без скидок на сайте</option><option value="error">Ошибки</option>
+        </select>
+      </div>
+      <div class="sources" id="sourcesList"></div>
+
+      <h2 class="view-title">О приложении</h2>
+      <div class="panel about">
+        <p>Данные собираются автоматически раз в сутки только из публичных страниц магазинов (без логинов и обхода защит). Названия — на латышском, ниже — автоперевод на русский. Цены и условия проверяйте по ссылке на источник.</p>
+        <p><button class="btn" id="refreshBtn">Обновить данные сейчас</button></p>
+      </div>
+    </section>
+  </main>
+
+  <nav class="tabbar" aria-label="Разделы">
+    <button data-tab="feed" class="active"><span aria-hidden="true">🏷️</span>Лента</button>
+    <button data-tab="best"><span aria-hidden="true">🏆</span>Лучшее</button>
+    <button data-tab="search"><span aria-hidden="true">🔎</span>Поиск</button>
+    <button data-tab="fav"><span aria-hidden="true">★</span>Избранное</button>
+    <button data-tab="more"><span aria-hidden="true">⋯</span>Ещё</button>
+  </nav>
+
+  <!-- Фильтры -->
+  <dialog id="filterDlg" class="sheet">
+    <form method="dialog">
+      <h2>Фильтры</h2>
+      <fieldset>
+        <legend>Магазины</legend>
+        <div class="store-grid" id="filterStores"></div>
+      </fieldset>
+      <fieldset>
+        <legend>Минимальная скидка: <b id="minPctLabel">0%</b></legend>
+        <input type="range" id="minPct" min="0" max="80" step="5" value="0">
+      </fieldset>
+      <fieldset>
+        <legend>Минимальная выгода: <b id="minEurLabel">0 €</b></legend>
+        <input type="range" id="minEur" min="0" max="20" step="0.5" value="0">
+      </fieldset>
+      <fieldset class="checks">
+        <label><input type="checkbox" id="fEndsToday"> Заканчивается сегодня</label>
+        <label><input type="checkbox" id="fMyStores"> Только мои магазины</label>
+        <label><input type="checkbox" id="fNoCard"> Без карты лояльности и приложения</label>
+        <label><input type="checkbox" id="fHideUpcoming"> Скрыть ещё не начавшиеся</label>
+        <label><input type="checkbox" id="fOnlyDiscounts"> Только с известной выгодой</label>
+      </fieldset>
+      <div class="row-actions">
+        <button class="btn" value="reset" id="resetFilters">Сбросить</button>
+        <button class="btn primary" value="ok">Показать</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Ручной купон -->
+  <dialog id="manualDlg" class="sheet">
+    <form method="dialog" id="manualForm">
+      <h2>Новый купон</h2>
+      <label class="photo-pick">
+        <input type="file" accept="image/*" id="mPhoto">
+        <span>📷 Фото / скриншот купона</span>
+      </label>
+      <p class="hint" id="ocrStatus"></p>
+      <img id="mPhotoPreview" alt="" hidden>
+      <label>Магазин <input list="storeNames" id="mStore" required placeholder="McDonald's"></label>
+      <datalist id="storeNames"></datalist>
+      <label>Категория <select id="mCategory"></select></label>
+      <label>Товар / услуга <input id="mTitle" required placeholder="Big Mac + картофель"></label>
+      <div class="two">
+        <label>Новая цена, € <input id="mPriceNew" inputmode="decimal"></label>
+        <label>Старая цена, € <input id="mPriceOld" inputmode="decimal"></label>
+      </div>
+      <div class="two">
+        <label>Скидка, % <input id="mPct" inputmode="numeric"></label>
+        <label>Действует до <input type="date" id="mValidTo"></label>
+      </div>
+      <label>Условия / промокод <textarea id="mConditions" rows="2"></textarea></label>
+      <label>Ссылка <input id="mUrl" type="url" placeholder="https://"></label>
+      <div class="row-actions">
+        <button class="btn" value="cancel" formnovalidate>Отмена</button>
+        <button class="btn primary" value="save" id="mSave">Сохранить</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+</body>
+</html>

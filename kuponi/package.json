@@ -1,0 +1,24 @@
+{
+  "name": "kuponi-lv",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Kuponi LV — купоны и акции магазинов Латвии в одном PWA",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "scrape": "node scrapers/run.js",
+    "scrape:one": "node scrapers/run.js --only",
+    "test": "node --test tests/*.test.js",
+    "serve": "node scripts/serve.js",
+    "discover": "node scripts/discover.js",
+    "notify:ntfy": "node scrapers/notify-ntfy.js",
+    "vapid": "node scripts/gen-vapid.js",
+    "icons": "node scripts/make-icons.js"
+  },
+  "dependencies": {
+    "cheerio": "1.0.0",
+    "playwright": "1.63.0"
+  }
+}
