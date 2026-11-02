@@ -126,3 +126,26 @@ test('буклеты VisasAkcijas', () => {
   assert.equal(mx.validTo, '2026-11-09');
   assert.equal(mx.source, 'maxima');
 });
+
+test('универсальный разбор: тысячи через неразрывный пробел, рассрочка не считается ценой', () => {
+  const html = `<div class="list"><div class="product"><a href="/p/rio"><h3>Dārza mēbeļu komplekts RIO</h3></a>
+    <span class="special-price">Īpaša cena 1 090,00 €</span>
+    <span class="old-price">Parastā cena 1 790,00 €</span>
+    <div>Iemaksa Mēneša maksājums 90,83 €</div><div>Depozīts: 25% - 272,50 €</div></div></div>`;
+  const d = extractHtmlDeals(html, 'https://www.home4you.lv/lv/');
+  assert.equal(d.length, 1);
+  assert.equal(d[0].priceOld, 1790);
+  assert.equal(d[0].priceNew, 1090);
+});
+
+test('универсальный разбор: Omnibus с суммой во вложенном теге и порогом покупки (Benu)', () => {
+  const html = `<div class="grid"><div class="bnuProduct"><h2><a href="/p/ziepes">TAKE TIME roku ziepes 300ml</a></h2>
+    <div class="bnuProduct__price"><ins><span class="money_amount">2,80</span> <span>€</span></ins>
+    <p>cena grozā pirkumam virs 9.99 € kampaņai: <strong>IZPARDOSANA</strong></p></div>
+    <p class="lowest">Zemākā cena 30 dienu laikā – <strong><span>6,99</span> <span>€</span></strong> (-60%)</p>
+    <p class="regular">Regulārā cena – <strong><span>6,99</span> <span>€</span></strong> (-60%)</p></div></div>`;
+  const d = extractHtmlDeals(html, 'https://www.benu.lv/');
+  assert.equal(d.length, 1);
+  assert.equal(d[0].priceOld, 6.99);
+  assert.equal(d[0].priceNew, 2.8);
+});

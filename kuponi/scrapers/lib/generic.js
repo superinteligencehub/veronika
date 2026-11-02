@@ -73,10 +73,15 @@ const OLD_SEL = [
   '[class*="regular-price"]', '[class*="price--regular"]', '[class*="strike"]', '[class*="crossed"]', '[class*="was-price"]',
 ].join(',');
 
-const PRICE_RE = /(?:€\s*(\d{1,5}(?:[ .]\d{3})*[.,]\d{2}|\d{1,5})|(\d{1,5}(?:[ .]\d{3})*[.,]\d{2})\s*(?:€|EUR|eur))/g;
+// Тысячи могут разделяться пробелом, неразрывным пробелом или точкой: «1 790,00 €»
+const PRICE_RE = /(?:€\s*(\d{1,3}(?:[   .]\d{3})+[.,]\d{2}|\d{1,5}[.,]\d{2})(?!\d)|(\d{1,3}(?:[   .]\d{3})+[.,]\d{2}|\d{1,5}[.,]\d{2}|\d{1,5})\s*(?:€|EUR\b|eur\b))/g;
+// Рассрочка, депозит, ежемесячный платёж — не цена товара
+const INSTALLMENT_RE = /(virs|summai|pirkumam|piegād\w*|mēneš\w*|mēn\.|iemaks\w*|depozīt\w*|līzing\w*|nomaks\w*|maksājum\w*|kredīt\w*|\bx\s?\d+\s?mēn)[^€]{0,60}€/gi;
 
 function pricesIn(text) {
-  return [...String(text).matchAll(PRICE_RE)].map((m) => parsePrice((m[1] ?? m[2]).replace(/[ .](?=\d{3}\b)/g, ''))).filter((n) => n > 0 && n < 100000);
+  return [...String(text).replace(INSTALLMENT_RE, ' ').matchAll(PRICE_RE)]
+    .map((m) => parsePrice((m[1] ?? m[2]).replace(/[   .](?=\d{3}(?:[.,]\d{2}|\b))/g, '')))
+    .filter((n) => n > 0 && n < 100000);
 }
 
 function jsonLdProducts($, base) {
@@ -117,12 +122,14 @@ function jsonLdProducts($, base) {
   return out;
 }
 
-const BAD_TITLE = /^(datu lapa|vairāk|uzzināt vairāk|pirkt|ielikt grozā|grozā|skatīt|apskatīt|add to cart|buy|more)$/i;
+const BAD_TITLE = /^(datu lapa|vairāk|uzzināt vairāk|pirkt|ielikt grozā|grozā|skatīt|apskatīt|add to cart|buy|more|call.*|sazināties|izvēlēties.*|dāvana|akcija|jaunums|izpārdošana|-?\d+ ?%.*)$/i;
 
 // Omnibus (ЕС): магазины обязаны показывать прежнюю/обычную цену — «Regulārā cena: 135,00 €»
-const OMNI_RE = /(Regulār[aā]|Iepriekš[eē]j[aā]|Parast[aā]|Ierast[aā]|Sākotnēj[aā]|Vecā) cena[^0-9€]{0,20}(\d{1,5}(?:[ .]\d{3})*[.,]\d{2}|\d{1,5})\s*€?/i;
+const OMNI_RE = /(Regulār[aā]|Iepriekš[eē]j[aā]|Parast[aā]|Ierast[aā]|Sākotnēj[aā]|Vecā|Zemāk[aā]) cena(?: (?:pēdējo )?30 dienu laikā)?[^0-9€]{0,20}(\d{1,3}(?:[   .]\d{3})+[.,]\d{2}|\d{1,5}[.,]\d{2}|\d{1,5}(?=\s*€))\s*€?/i;
 const NOW_RE = /Cena (?:šobrīd|tagad|ar atlaidi)[^0-9€]{0,20}(\d{1,5}[.,]\d{2})/i;
 const UNTIL_RE = /(?:derīg[sa]|spēkā|ilgst)[^0-9]{0,20}(\d{4}-\d{2}-\d{2}|\d{1,2}\.\d{1,2}\.\d{4})/i;
+
+const parseThousands = (s) => parsePrice(String(s).replace(/[ \u00a0\u202f.](?=\d{3}(?:[.,]\d{2}|\b))/g, ''));
 
 function toIsoDate(s) {
   if (!s) return null;
@@ -144,13 +151,14 @@ export function oldPriceNodes($) {
       const txt = cheerio.load(v).root().text();
       const m = txt.match(OMNI_RE);
       if (!m) continue;
-      nodes.push({ el, priceOld: parsePrice(m[2]), priceNew: parsePrice(txt.match(NOW_RE)?.[1]), validTo: toIsoDate(txt.match(UNTIL_RE)?.[1]) });
+      nodes.push({ el, priceOld: parseThousands(m[2]), priceNew: parsePrice(txt.match(NOW_RE)?.[1]), validTo: toIsoDate(txt.match(UNTIL_RE)?.[1]) });
       return;
     }
-    const own = $(el).clone().children().remove().end().text();
-    if (own.length < 120) {
+    // текст элемента целиком (сумма часто во вложенном <strong>/<span>), но только у «мелких» узлов
+    const own = $(el).text();
+    if (own.length < 160 && !$(el).children().filter((__, ch) => OMNI_RE.test($(ch).text())).length) {
       const m = own.match(OMNI_RE);
-      if (m) nodes.push({ el, priceOld: parsePrice(m[2]) });
+      if (m) nodes.push({ el, priceOld: parseThousands(m[2]) });
     }
   });
   return nodes.filter((n) => n.priceOld > 0);
@@ -164,19 +172,24 @@ export function cardProducts($, base) {
     // поднимаемся до контейнера карточки: в нём есть ссылка и цена ниже старой
     let $c = $(node.el).parent();
     for (let depth = 0; depth < 8 && $c.length; depth++, $c = $c.parent()) {
-      const text = $c.clone().find(OLD_SEL).remove().end().text().replace(OMNI_RE, ' ');
+      const text = $c.clone().find(`script,style,noscript,template,${OLD_SEL}`).remove().end().text().replace(OMNI_RE, ' ');
       const lower = node.priceNew && node.priceNew < priceOld ? [node.priceNew] : pricesIn(text).filter((p) => p < priceOld);
       const $a = $c.find('a[href]').filter((__, a) => !/^(#|javascript:|mailto:|tel:)|\.pdf$/i.test($(a).attr('href') ?? '')).first();
       if (!lower.length || !$a.length) continue;
       if ($c.find('a[href]').length > 12) break; // ушли слишком высоко — это уже список
       const href = new URL($a.attr('href'), base).href;
       if (seen.has(href)) break;
-      const title =
-        cleanText($c.find('h2,h3,h4,[class*="title"],[class*="name"]').first().text()) ||
-        cleanText($a.attr('title')) ||
-        cleanText($c.find('img').first().attr('alt')) ||
-        cleanText($a.text());
-      if (!title || title.length < 3 || title.length > 200 || /^\d/.test(title) || BAD_TITLE.test(title)) continue; // название — выше по дереву
+      // самый информативный заголовок карточки (не бренд и не кнопка)
+      const cands = [
+        ...$c.find('h1,h2,h3,h4,[class*="title"],[class*="name"]').map((__, e) => cleanText($(e).text())).get(),
+        cleanText($a.attr('title')),
+        cleanText($c.find('img').first().attr('alt')),
+        cleanText($a.text()),
+      ]
+        .map((t) => t?.replace(/^(product image of|image of|attēls:?)\s*/i, '').replace(/^(īss derīguma termiņš|izpārdošana|jaunums|akcija)\s*-?\d*\s*%?\s*/i, ''))
+        .filter((t) => t && t.length >= 3 && t.length <= 200 && !/^\d/.test(t) && !BAD_TITLE.test(t) && !pricesIn(t).length);
+      const title = cands.sort((x, y) => y.length - x.length)[0];
+      if (!title) continue; // название — выше по дереву
       const img = $c.find('img').first();
       const src = img.attr('data-src') || img.attr('data-lazy-src') || img.attr('src');
       seen.add(href);
@@ -220,7 +233,7 @@ export function extractHtmlDeals(html, base) {
   const ld = jsonLdProducts($, base);
   const cards = cardProducts($, base);
   const byUrl = new Map();
-  for (const p of [...ld, ...cards]) if (!byUrl.has(p.url + p.title)) byUrl.set(p.url + p.title, p);
+  for (const p of [...ld, ...cards]) if (!byUrl.has(p.url)) byUrl.set(p.url, p);
   return [...byUrl.values()].filter((p) => {
     const pct = (1 - p.priceNew / p.priceOld) * 100;
     return pct >= 3 && pct <= 90;
