@@ -4,6 +4,7 @@ name: Kuponi LV — утреннее уведомление (ntfy)
 # GitHub Actions в 08:00 по Риге отправляет туда топ-5 дня. Включается переменной репозитория
 # NTFY_TOPIC (Settings → Secrets and variables → Actions → Variables). Основной канал — Web Push
 # через Cloudflare Worker (kuponi/worker), ему этот workflow не нужен.
+# По умолчанию используется тема из kuponi/web/config.js (ntfyTopic); переменная NTFY_TOPIC её заменяет.
 
 on:
   schedule:
@@ -14,7 +15,6 @@ on:
 
 jobs:
   notify:
-    if: vars.NTFY_TOPIC != ''
     runs-on: ubuntu-latest
     timeout-minutes: 5
     defaults:
@@ -27,5 +27,5 @@ jobs:
           node-version: 22
       - run: node scrapers/notify-ntfy.js ${{ github.event_name == 'workflow_dispatch' && '--force' || '' }}
         env:
-          NTFY_TOPIC: ${{ vars.NTFY_TOPIC }}
-          KUPONI_APP_URL: ${{ vars.KUPONI_APP_URL }}
+          NTFY_TOPIC: ${{ vars.NTFY_TOPIC || 'kuponi-lv-d4208b90d063' }}
+          KUPONI_APP_URL: ${{ vars.KUPONI_APP_URL || 'https://superinteligencehub.github.io/veronika/kuponi/web' }}

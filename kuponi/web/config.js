@@ -8,5 +8,5 @@ self.KUPONI_CONFIG = {
   // Публичный VAPID-ключ (base64url) из `npm run vapid`. Приватный ключ — только в секретах Worker.
   vapidPublicKey: '',
   // Альтернатива без сервера: тема ntfy.sh, в которую GitHub Actions отправляет утренний топ (см. README).
-  ntfyTopic: '',
+  ntfyTopic: 'kuponi-lv-d4208b90d063',
 };
