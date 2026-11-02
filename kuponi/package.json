@@ -10,6 +10,7 @@
     "scrape:one": "node scrapers/run.js --only",
     "test": "node --test tests/*.test.js",
     "serve": "node scripts/serve.js",
+    "discover": "node scripts/discover.js",
     "notify:ntfy": "node scrapers/notify-ntfy.js",
     "vapid": "node scripts/gen-vapid.js",
     "icons": "node scripts/make-icons.js"

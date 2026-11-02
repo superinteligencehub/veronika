@@ -5,7 +5,7 @@ const DATA_URL = CFG.dataUrl ?? '../data/coupons.json';
 const TZ = 'Europe/Riga';
 const PAGE = 30;
 
-const CAT_ICONS = { groceries: '🛒', fastfood: '🍔', auto: '⛽', electronics: '🔌', beauty: '💄', other: '🎟️' };
+const CAT_ICONS = { groceries: '🛒', kids: '🧸', fastfood: '🍔', auto: '⛽', electronics: '🔌', home: '🏠', beauty: '💄', fashion: '👗', sport: '⚽', pets: '🐾', books: '📚', fun: '🎬', delivery: '🛵', telecom: '📶', travel: '✈️', other: '🎟️' };
 const STORE_COLORS = {
   rimi: '#d6001c', maxima: '#1e5bb8', lidl: '#f2c500', circlek: '#ee6a1f', mcdonalds: '#ffbc0d', barbora: '#e4002b',
   mego: '#ff6a00', top: '#e30613', elvi: '#008c45', kfc: '#a3080c', burgerking: '#d62300', neste: '#00a651', virsi: '#0c4da2',
@@ -17,7 +17,7 @@ const REQUIRES_RU = {
   'card:mansrimi': '💳 Mans Rimi',
   'app:circlek-extra': '📱 Circle K EXTRA',
 };
-const STATUS_RU = { ok: 'работает', stale: 'старые данные', error: 'ошибка', manual: 'ручной ввод', planned: 'в планах' };
+const STATUS_RU = { ok: 'работает', stale: 'старые данные', error: 'ошибка', manual: 'ручной ввод', planned: 'нет скидок на сайте' };
 
 // ---------- утилиты ----------
 const $ = (s, r = document) => r.querySelector(s);
@@ -136,6 +136,7 @@ function cardHtml(c) {
   const badges = [];
   if (c.savingEur) badges.push(`<span class="badge save">−${eurShort(c.savingEur)}${c.savingPct ? ` · −${c.savingPct}%` : ''}</span>`);
   else if (c.savingPct) badges.push(`<span class="badge save">−${c.savingPct}%</span>`);
+  if (c.kind === 'catalog') badges.push('<span class="badge req">📖 буклет акций</span>');
   badges.push(validityBadge(c));
   for (const r of c.requires ?? []) badges.push(`<span class="badge req">${esc(REQUIRES_RU[r] ?? r)}</span>`);
   if (c.manual) badges.push('<span class="badge soon">✍️ вручную</span>');
@@ -147,7 +148,7 @@ function cardHtml(c) {
   }).join('');
   const details = `<details><summary>Условия и источник</summary>${conds ? `<ul class="conds">${conds}</ul>` : ''}${
     c.validFrom || c.validTo ? `<div>Срок: ${c.validFrom ? `с ${ddmm(c.validFrom)} ` : ''}${c.validTo ? `по ${ddmm(c.validTo)}.${c.validTo.slice(0, 4)}` : ''}</div>` : ''
-  }${c.url ? `<a class="src" href="${esc(c.url)}" target="_blank" rel="noopener">Открыть источник ↗</a>` : ''}${
+  }${c.url ? `<a class="src" href="${esc(c.url)}" target="_blank" rel="noopener">${c.kind === 'catalog' ? 'Открыть буклет ↗' : 'Открыть источник ↗'}</a>` : ''}${
     c.local ? ` · <button class="btn" data-del="${esc(c.id)}">Удалить</button>` : ''
   }</details>`;
 
@@ -243,6 +244,11 @@ function renderBest() {
   ending.sort(SORTS.eur);
   $('#endingTitle').textContent = `Заканчиваются сегодня (${ending.length})`;
   $('#endingList').innerHTML = ending.slice(0, 20).map(cardHtml).join('') || '<p class="empty">Сегодня ничего не заканчивается.</p>';
+  let cats = S.all.filter((c) => c.kind === 'catalog');
+  if (scope === 'my' && hasMy) cats = cats.filter((c) => S.myStores.has(c.store));
+  cats.sort((a, b) => a.store.localeCompare(b.store));
+  $('#catalogTitle').textContent = `Буклеты акций (${cats.length})`;
+  $('#catalogList').innerHTML = cats.map(cardHtml).join('') || '<p class="empty">Нет действующих буклетов.</p>';
 }
 
 // ---------- поиск ----------
@@ -353,19 +359,23 @@ function toggleFav(id) {
 function renderSources() {
   const src = S.data?.sources ?? [];
   const by = (st) => src.filter((s) => s.status === st).length;
-  $('#sourcesSummary').textContent = `Автосбор: ${by('ok')} работают, ${by('stale') + by('error')} с проблемами · ручной ввод: ${by('manual')} · в планах: ${by('planned')}`;
+  $('#sourcesSummary').textContent = `Всего источников: ${src.length}. Автосбор: ${by('ok')} работают, ${by('stale') + by('error')} с проблемами · ручной ввод: ${by('manual')} · без публичных скидок: ${by('planned')}`;
+  const q = norm($('#sourceFilter')?.value ?? '');
+  const st = $('#sourceStatus')?.value ?? 'all';
   const order = { ok: 0, stale: 1, error: 2, manual: 3, planned: 4 };
+  const cats = categories();
   $('#sourcesList').innerHTML = [...src]
+    .filter((s) => (st === 'all' || s.status === st) && (!q || norm(`${s.name} ${s.url} ${cats[s.category] ?? ''}`).includes(q)))
     .sort((a, b) => order[a.status] - order[b.status] || a.name.localeCompare(b.name))
     .map((s) => {
       const last = s.lastSuccess ? new Intl.DateTimeFormat('ru-RU', { timeZone: TZ, day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }).format(new Date(s.lastSuccess)) : null;
       return `<div class="source"><div class="top"><span class="name">${CAT_ICONS[s.category] ?? ''} ${esc(s.name)}</span><span class="status ${esc(s.status)}">${STATUS_RU[s.status] ?? s.status}${s.count ? ` · ${s.count}` : ''}</span></div>
         ${s.note ? `<p class="note">${esc(s.note)}</p>` : ''}
         ${s.error ? `<p class="err">${esc(s.error)}</p>` : ''}
-        <p class="note">${last ? `Последний успешный сбор: ${last}. ` : ''}<a href="${esc(s.url)}" target="_blank" rel="noopener">Сайт ↗</a>${
-          s.status === 'manual' || s.status === 'error' ? ` · <button class="btn" data-addfor="${esc(s.name)}" data-cat="${esc(s.category)}">+ купон</button>` : ''}</p></div>`;
+        <p class="note">${esc(cats[s.category] ?? '')}${last ? ` · сбор: ${last}` : ''} · <a href="${esc(s.url)}" target="_blank" rel="noopener">Сайт ↗</a>${
+          ['manual', 'error', 'planned'].includes(s.status) ? ` · <button class="btn" data-addfor="${esc(s.name)}" data-cat="${esc(s.category)}">+ купон</button>` : ''}</p></div>`;
     })
-    .join('');
+    .join('') || '<p class="empty">Ничего не найдено.</p>';
 }
 
 // ---------- уведомления ----------
@@ -697,6 +707,8 @@ function bind() {
       a.click();
     }
   });
+  $('#sourceFilter').addEventListener('input', renderSources);
+  $('#sourceStatus').addEventListener('change', renderSources);
   $('#refreshBtn').addEventListener('click', () => loadData({ force: true }).then(() => toast('Данные обновлены')));
 
   // Тема

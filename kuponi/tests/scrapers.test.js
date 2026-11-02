@@ -104,3 +104,25 @@ test('словарный перевод', () => {
   assert.match(glossaryTranslate('Cena ar Lidl Plus'), /Цена с приложением Lidl Plus/);
   assert.match(glossaryTranslate('Graudainais biezpiens SMILTENE'), /творог SMILTENE/);
 });
+
+import { extractHtmlDeals } from '../scrapers/lib/generic.js';
+import { parseCatalogs } from '../scrapers/stores/visasakcijas.js';
+
+test('универсальный разбор: Omnibus «Regulārā cena» + срок (Baby City)', () => {
+  const d = extractHtmlDeals(fx('babycity-sale.html'), 'https://www.babycity.lv/lv/x');
+  assert.ok(d.length >= 3, `найдено ${d.length}`);
+  const coat = d.find((x) => /HUPPA/.test(x.title));
+  assert.equal(coat.priceOld, 135);
+  assert.equal(coat.priceNew, 67.5);
+  assert.equal(coat.validTo, '2027-11-01');
+  assert.match(coat.url, /^https:\/\/www\.babycity\.lv\/lv\//);
+});
+
+test('буклеты VisasAkcijas', () => {
+  const c = parseCatalogs(fx('visasakcijas.html'), '2026-11-02');
+  const mx = c.find((x) => x.store === 'Maxima');
+  assert.equal(mx.kind, 'catalog');
+  assert.equal(mx.validFrom, '2026-11-03');
+  assert.equal(mx.validTo, '2026-11-09');
+  assert.equal(mx.source, 'maxima');
+});

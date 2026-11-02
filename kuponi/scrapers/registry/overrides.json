@@ -1,0 +1,12 @@
+{
+  "_comment": "Ручные настройки для магазинов, где автообнаружение не нашло страницу акций. Поля заменяют результат discover.js.",
+  "babycity.lv": {
+    "status": "auto",
+    "platform": "browser",
+    "origin": "https://www.babycity.lv",
+    "url": "https://www.babycity.lv/lv/",
+    "saleUrls": ["https://www.babycity.lv/lv/izpardosana-atlaides-nesummejas-un-attiecas-uz-noteiktam-precem/0525"],
+    "pages": 8,
+    "note": "Страница распродажи (рендер в браузере), цены и срок из пометки «Regulārā cena / Akcija derīga līdz»"
+  }
+}

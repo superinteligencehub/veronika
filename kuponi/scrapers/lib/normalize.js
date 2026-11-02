@@ -29,11 +29,21 @@ import { normKey, round2, shortHash, rigaDate } from './util.js';
 
 export const CATEGORIES = {
   groceries: 'Продукты',
+  kids: 'Детям',
   fastfood: 'Фастфуд и кафе',
   auto: 'Авто и топливо',
-  electronics: 'Электроника и дом',
-  beauty: 'Красота и здоровье',
-  other: 'Спорт, одежда, досуг',
+  electronics: 'Электроника',
+  home: 'Дом и сад',
+  beauty: 'Красота и аптеки',
+  fashion: 'Одежда и обувь',
+  sport: 'Спорт',
+  pets: 'Животные',
+  books: 'Книги и канцелярия',
+  fun: 'Кино и досуг',
+  delivery: 'Доставка еды',
+  telecom: 'Связь',
+  travel: 'Путешествия',
+  other: 'Другое',
 };
 
 /** Привести сырой объект скрапера к общему формату. Возвращает null, если данные битые. */
@@ -65,7 +75,8 @@ export function normalizeCoupon(raw, source) {
 
   return {
     id: shortHash(source.id, normKey(title), priceNew ?? '', validTo ?? '', raw.variant ?? ''),
-    source: source.id,
+    source: raw.source ?? source.id,
+    ...(raw.source && raw.source !== source.id ? { via: source.id } : {}),
     store: raw.store ?? source.name,
     category: raw.category ?? source.category,
     kind,

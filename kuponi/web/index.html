@@ -57,6 +57,9 @@
       <ol class="cards ranked" id="bestList"></ol>
       <h3 class="section-title" id="endingTitle">Заканчиваются сегодня</h3>
       <div class="cards" id="endingList"></div>
+      <h3 class="section-title" id="catalogTitle">Буклеты акций</h3>
+      <p class="hint">Сети, у которых акции публикуются только в буклете (PDF): открывайте по ссылке.</p>
+      <div class="cards" id="catalogList"></div>
     </section>
 
     <!-- Поиск -->
@@ -95,6 +98,13 @@
 
       <h2 class="view-title">Источники</h2>
       <p class="hint" id="sourcesSummary"></p>
+      <div class="toolbar">
+        <input type="search" id="sourceFilter" class="pill" placeholder="Найти магазин…" aria-label="Найти магазин">
+        <select id="sourceStatus" class="pill" aria-label="Статус">
+          <option value="all">Все</option><option value="ok">Работают</option><option value="manual">Ручной ввод</option>
+          <option value="planned">Без скидок на сайте</option><option value="error">Ошибки</option>
+        </select>
+      </div>
       <div class="sources" id="sourcesList"></div>
 
       <h2 class="view-title">О приложении</h2>

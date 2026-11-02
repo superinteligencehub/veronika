@@ -12,7 +12,8 @@ import { fileURLToPath } from 'node:url';
 import { SOURCES } from './sources.js';
 import { normalizeCoupon, filterActive, dedupe, byValue, CATEGORIES } from './lib/normalize.js';
 import { Translator } from './lib/translate.js';
-import { BlockedError } from './lib/http.js';
+import { BlockedError, mapLimit } from './lib/http.js';
+import { closeBrowser } from './lib/browser.js';
 import { rigaDate } from './lib/util.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -72,42 +73,43 @@ async function main() {
 
   const sourceStates = [];
   let collected = [];
+  const CONCURRENCY = Number(process.env.KUPONI_CONCURRENCY ?? 6);
 
-  for (const source of SOURCES) {
+  const states = await mapLimit(SOURCES, CONCURRENCY, async (source) => {
     const prevState = prevSources.get(source.id) ?? {};
-    const base = { id: source.id, name: source.name, category: source.category, mode: source.mode, url: source.url, note: source.note };
+    const base = { id: source.id, name: source.name, category: source.category, mode: source.mode, url: source.url, note: source.note, ...(source.aggregator ? { aggregator: true } : {}) };
+    const prevOf = () => prevCoupons.filter((c) => (c.via ?? c.source) === source.id && !c.manual);
 
     if (!source.module || source.mode === 'planned') {
-      sourceStates.push({ ...base, status: source.mode === 'manual' ? 'manual' : 'planned', count: 0 });
-      continue;
+      return { state: { ...base, status: source.mode === 'manual' ? 'manual' : 'planned', count: 0 }, coupons: [] };
     }
     if (only && !only.has(source.id)) {
-      // не запускали — переносим прошлые данные как есть
-      const kept = prevCoupons.filter((c) => c.source === source.id);
-      collected.push(...kept);
-      sourceStates.push({ ...base, ...prevState, ...base, count: kept.length });
-      continue;
+      return { state: { ...prevState, ...base }, coupons: prevOf() };
     }
-
     console.log(`→ ${source.name}`);
     const res = await runSource(source, today);
     if (res.status === 'ok') {
-      collected.push(...res.coupons);
-      sourceStates.push({ ...base, status: 'ok', count: res.coupons.length, lastSuccess: new Date().toISOString(), durationMs: res.durationMs });
-      continue;
+      return { state: { ...base, status: 'ok', count: res.coupons.length, lastSuccess: new Date().toISOString(), durationMs: res.durationMs }, coupons: res.coupons };
     }
-    // Ошибка: показываем прошлые (ещё не просроченные) купоны этого источника с пометкой «устарело»
-    const stale = filterActive(prevCoupons.filter((c) => c.source === source.id && !c.manual), today).map((c) => ({ ...c, stale: true }));
-    collected.push(...stale);
-    sourceStates.push({
-      ...base,
-      status: res.status === 'blocked' ? 'manual' : stale.length ? 'stale' : 'error',
-      error: res.error,
-      count: stale.length,
-      lastSuccess: prevState.lastSuccess ?? null,
-      durationMs: res.durationMs,
-    });
+    // Ошибка: показываем прошлые (ещё не просроченные) купоны с пометкой «устарело»
+    const stale = filterActive(prevOf(), today).map((c) => ({ ...c, stale: true }));
+    return {
+      state: {
+        ...base,
+        status: res.status === 'blocked' ? 'manual' : stale.length ? 'stale' : 'error',
+        error: res.error,
+        count: stale.length,
+        lastSuccess: prevState.lastSuccess ?? null,
+        durationMs: res.durationMs,
+      },
+      coupons: stale,
+    };
+  });
+  for (const s of states) {
+    sourceStates.push(s.state);
+    collected.push(...s.coupons);
   }
+  await closeBrowser();
 
   // Купоны, добавленные вручную в репозитории (data/manual.json)
   const manual = await readJson(join(DATA, 'manual.json'), []);
@@ -140,7 +142,7 @@ async function main() {
 
   coupons.sort(byValue);
   // Количество по источникам после дедупликации/фильтра
-  const counts = coupons.reduce((m, c) => m.set(c.source, (m.get(c.source) ?? 0) + 1), new Map());
+  const counts = coupons.reduce((m, c) => m.set(c.via ?? c.source, (m.get(c.via ?? c.source) ?? 0) + 1), new Map());
   for (const s of sourceStates) if (s.status !== 'planned') s.count = counts.get(s.id) ?? 0;
 
   const out = {
@@ -155,6 +157,7 @@ async function main() {
   await writeFile(OUT, `${JSON.stringify(out)}\n`);
   const okCount = sourceStates.filter((s) => s.status === 'ok').length;
   console.log(`Готово: ${coupons.length} купонов, источники ok: ${okCount}/${sourceStates.filter((s) => s.mode === 'auto').length} → ${OUT}`);
+  for (const s of sourceStates.filter((x) => x.mode === 'auto')) console.log(`  ${s.status.padEnd(6)} ${String(s.count).padStart(5)}  ${s.name}${s.error ? ` — ${s.error.slice(0, 100)}` : ''}`);
   if (!coupons.length) process.exitCode = 1;
 }
 
